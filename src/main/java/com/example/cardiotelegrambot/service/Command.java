@@ -90,19 +90,22 @@ public class Command {
     }
 
     public void help() {
-        SendMessage message = new SendMessage(id, String.format("""
-                Если Вам нужна помощь, Вы можете обратиться к создателю этого бота!
-                Вот его аккаунт: %s.
-                """, creatorAlias));
-        bot.execute(message);
+        bot.execute(new SendMessage(
+                id,
+                String.format("""
+                        Если Вам нужна помощь, Вы можете обратиться к создателю этого бота!
+                        Вот его аккаунт: %s.
+                        """, creatorAlias)));
     }
 
     public void notACommand() {
-        SendMessage message = new SendMessage(id, """
-                Кажется, Вы ввели неправильную команду.
-                Ничего страшного, попробуйте еще раз!
-                Чтобы все правильно сработало, нажмите кнопку меню внизу экрана, и Вы увидите список доступных команд.
-                """);
-        bot.execute(message);
+        bot.execute(new SendMessage(
+                id,
+                """
+                        Кажется, Вы ввели неправильную команду.
+                        Ничего страшного, попробуйте еще раз!
+                        Чтобы все правильно сработало, нажмите кнопку меню внизу экрана, и Вы увидите список доступных команд.
+                        """
+        ));
     }
 }
