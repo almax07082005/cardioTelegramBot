@@ -26,7 +26,10 @@ public class Command {
     private String linkToFile;
 
     @Value("${telegram.creator.alias}")
-    private String alias;
+    private String creatorAlias;
+
+    @Value("${telegram.channel.alias}")
+    private String channelAlias;
 
     @Autowired
     public Command(TelegramBot bot, ConfigurableApplicationContext context) {
@@ -65,7 +68,7 @@ public class Command {
             bot.execute(new GetChatMember(
                     context.getBean(BotConfig.class).getChannelId(),
                     id
-            ));
+            )).chatMember().status();
             bot.execute(new SendMessage(
                     id,
                     String.format("""
@@ -73,15 +76,15 @@ public class Command {
                             %s
                             """, linkToFile)
             ));
-        } catch (NullPointerException exception) {
+        } catch (Exception exception) {
             LogConfig.logError(exception.getStackTrace());
             bot.execute(new SendMessage(
                     id,
-                    """
+                    String.format("""
                             Извините, но кажется Вы не подписаны на наш канал.
-                            Проверьте, подписаны ли Вы, там много полезной информации!
+                            Проверьте, подписаны ли Вы на канал %s, там много полезной информации!
                             Если Вы уже проверили и все равно не работает, выберите команду /help и напишите мне, я обязательно Вам помогу!
-                            """
+                            """, channelAlias)
             ));
         }
     }
@@ -90,7 +93,7 @@ public class Command {
         SendMessage message = new SendMessage(id, String.format("""
                 Если Вам нужна помощь, Вы можете обратиться к создателю этого бота!
                 Вот его аккаунт: %s.
-                """, alias));
+                """, creatorAlias));
         bot.execute(message);
     }
 
