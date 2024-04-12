@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 @Configuration
 @Slf4j
-public class LogConfig {
+public abstract class LogConfig {
 
     public static void logError(StackTraceElement[] stackTraceElements) {
         log.error(String.join("\n", Arrays.toString(stackTraceElements).split(" ")));
