@@ -40,6 +40,7 @@ public class Bot {
         });
     }
 
+    // TODO Automate getting list of commands
     private void executeCommand(Update update) {
         Command command = context.getBean(Command.class).setByUpdate(update);
 
