@@ -3,8 +3,10 @@ package com.example.cardiotelegrambot.service;
 import com.example.cardiotelegrambot.config.BotConfig;
 import com.example.cardiotelegrambot.config.LogConfig;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
+import com.pengrad.telegrambot.request.GetMyCommands;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.GetChatMemberResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +41,24 @@ public class Command {
     }
 
     public void start() {
-        // TODO Get list of commands
-        SendMessage message = new SendMessage(id, """
+        StringBuilder text = new StringBuilder("""
                 Привет, я бот Максим и могу помочь с чем угодно!
                 Вот список доступных команд:
-                /start - начать новый диалог;
-                /guide - получить гид;
-                /help - получить помощь.
                 """);
+        BotCommand[] commands = bot.execute(new GetMyCommands()).commands();
+
+        for (int i = 0; i < commands.length; i++) {
+            BotCommand command = commands[i];
+            text.append("/")
+                    .append(command.command())
+                    .append(" - ")
+                    .append(command.description());
+
+            if (i + 1 == commands.length) text.append(".");
+            else text.append(";\n");
+        }
+
+        SendMessage message = new SendMessage(id, text.toString());
         bot.execute(message);
     }
 

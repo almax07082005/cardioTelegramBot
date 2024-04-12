@@ -14,6 +14,10 @@ public class LogConfig {
     }
 
     public static <T> void logInfo(T info) {
-        log.info(info.toString());
+        try {
+            log.info(info.toString());
+        } catch (NullPointerException exception) {
+            LogConfig.logError(exception.getStackTrace());
+        }
     }
 }
