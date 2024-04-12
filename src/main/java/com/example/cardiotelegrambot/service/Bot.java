@@ -23,7 +23,9 @@ public class Bot {
     public void startBot() {
 		bot.setUpdatesListener(updates -> {
             try {
-                executeCommand(updates.getLast());
+                for (Update update : updates) {
+                    executeCommand(update);
+                }
             } catch (Exception exception) {
                 LogConfig.logError(exception.getStackTrace());
             }

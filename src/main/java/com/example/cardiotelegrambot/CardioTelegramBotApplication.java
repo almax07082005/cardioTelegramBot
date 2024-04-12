@@ -10,7 +10,6 @@ public class CardioTelegramBotApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(CardioTelegramBotApplication.class, args);
-        Bot bot = context.getBean(Bot.class);
-        bot.startBot();
+        context.getBean(Bot.class).startBot();
     }
 }

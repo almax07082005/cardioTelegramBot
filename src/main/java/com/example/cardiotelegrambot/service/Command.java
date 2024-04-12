@@ -8,7 +8,6 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.request.GetMyCommands;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.GetChatMemberResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -42,7 +41,7 @@ public class Command {
 
     public void start() {
         StringBuilder text = new StringBuilder("""
-                Привет, я бот Максим и могу помочь с чем угодно!
+                Привет, я Кардио Бот и помогу Вам!
                 Вот список доступных команд:
                 """);
         BotCommand[] commands = bot.execute(new GetMyCommands()).commands();
@@ -58,20 +57,33 @@ public class Command {
             else text.append(";\n");
         }
 
-        SendMessage message = new SendMessage(id, text.toString());
-        bot.execute(message);
+        bot.execute(new SendMessage(id, text.toString()));
     }
 
     public void guide() {
-        // TODO Understand, why info gives false
-        GetChatMemberResponse response = bot.execute(new GetChatMember(context.getBean(BotConfig.class).getChannelId(), id));
-        LogConfig.logInfo(response.chatMember().isMember());
-
-        SendMessage message = new SendMessage(id, String.format("""
-                А вот и ваш гид! (доступен по ссылке на Яндекс диске)
-                %s
-                """, linkToFile));
-        bot.execute(message);
+        try {
+            bot.execute(new GetChatMember(
+                    context.getBean(BotConfig.class).getChannelId(),
+                    id
+            ));
+            bot.execute(new SendMessage(
+                    id,
+                    String.format("""
+                            А вот и ваш гайд! (доступен по ссылке на Яндекс диске)
+                            %s
+                            """, linkToFile)
+            ));
+        } catch (NullPointerException exception) {
+            LogConfig.logError(exception.getStackTrace());
+            bot.execute(new SendMessage(
+                    id,
+                    """
+                            Извините, но кажется Вы не подписаны на наш канал.
+                            Проверьте, подписаны ли Вы, там много полезной информации!
+                            Если Вы уже проверили и все равно не работает, выберите команду /help и напишите мне, я обязательно Вам помогу!
+                            """
+            ));
+        }
     }
 
     public void help() {
@@ -86,6 +98,7 @@ public class Command {
         SendMessage message = new SendMessage(id, """
                 Кажется, Вы ввели неправильную команду.
                 Ничего страшного, попробуйте еще раз!
+                Чтобы все правильно сработало, нажмите кнопку меню внизу экрана и Вы увидите список доступных команд.
                 """);
         bot.execute(message);
     }
