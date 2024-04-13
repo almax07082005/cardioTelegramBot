@@ -4,6 +4,7 @@ import com.example.cardiotelegrambot.config.BotConfig;
 import com.example.cardiotelegrambot.config.LogConfig;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.BotCommand;
+import com.pengrad.telegrambot.model.ChatMember;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.request.GetMyCommands;
@@ -65,10 +66,15 @@ public class Command {
 
     public void guide() {
         try {
-            bot.execute(new GetChatMember(
+            ChatMember.Status status = bot.execute(new GetChatMember(
                     context.getBean(BotConfig.class).getChannelId(),
                     id
             )).chatMember().status();
+
+            if (!(status == ChatMember.Status.creator || status == ChatMember.Status.administrator || status == ChatMember.Status.member)) {
+                throw new NullPointerException("Current user is not a member");
+            }
+
             bot.execute(new SendMessage(
                     id,
                     String.format("""
@@ -81,7 +87,7 @@ public class Command {
             bot.execute(new SendMessage(
                     id,
                     String.format("""
-                            Извините, но кажется Вы не подписаны на наш канал.
+                            Извините, но, кажется, Вы не подписаны на наш канал.
                             Проверьте, подписаны ли Вы на канал %s, там много полезной информации!
                             Если Вы уже проверили и все равно не работает, выберите команду /help и напишите мне, я обязательно Вам помогу!
                             """, channelAlias)
