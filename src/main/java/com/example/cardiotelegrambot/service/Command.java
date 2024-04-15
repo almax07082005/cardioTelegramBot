@@ -19,6 +19,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This is a service class for handling commands.
+ * It uses the TelegramBot library for interacting with the Telegram API and the Spring framework for dependency injection and configuration.
+ * It provides methods for handling different commands.
+ */
 @Component
 @PropertySource("classpath:hidden.properties")
 public class Command {
@@ -39,6 +44,14 @@ public class Command {
     @Value("${telegram.channel.alias}")
     private String channelAlias;
 
+    /**
+     * This is a constructor that takes a TelegramBot object and a ConfigurableApplicationContext object as input.
+     * It uses these objects to set the bot and context properties.
+     * It also initializes the mapCommands property with methods for handling different commands.
+     *
+     * @param bot A TelegramBot object for interacting with the Telegram API.
+     * @param context A ConfigurableApplicationContext object for accessing application context.
+     */
     @Autowired
     public Command(TelegramBot bot, ConfigurableApplicationContext context) {
         this.bot = bot;
@@ -50,11 +63,22 @@ public class Command {
         mapCommands.put("/help", this::help);
     }
 
+    /**
+     * This method sets the id property by an Update object.
+     * It uses the chat id from the message in the update to set the id property.
+     *
+     * @param update An Update object representing an incoming update from Telegram.
+     * @return The current Command object.
+     */
     public Command setByUpdate(Update update) {
         id = update.message().chat().id();
         return this;
     }
 
+    /**
+     * This method handles the /start command.
+     * It sends a message to the user with a list of available commands.
+     */
     public void start() {
         StringBuilder text = new StringBuilder("""
                 Привет, я Кардио Бот и помогу Вам!
@@ -76,6 +100,11 @@ public class Command {
         bot.execute(new SendMessage(id, text.toString()));
     }
 
+    /**
+     * This method handles the /guide command.
+     * It checks if the user is a member of the channel and sends a message with a link to the guide.
+     * If the user is not a member of the channel, it sends a message asking the user to join the channel.
+     */
     public void guide() {
         try {
             ChatMember.Status status = bot.execute(new GetChatMember(
@@ -107,6 +136,10 @@ public class Command {
         }
     }
 
+    /**
+     * This method handles the /help command.
+     * It sends a message to the user with the alias of the creator of the bot.
+     */
     public void help() {
         bot.execute(new SendMessage(
                 id,
@@ -116,6 +149,10 @@ public class Command {
                         """, creatorAlias)));
     }
 
+    /**
+     * This method handles unrecognized commands.
+     * It sends a message to the user informing them that they entered an unrecognized command.
+     */
     public void notACommand() {
         bot.execute(new SendMessage(
                 id,
