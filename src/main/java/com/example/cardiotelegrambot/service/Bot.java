@@ -40,15 +40,13 @@ public class Bot {
         });
     }
 
-    // TODO Automate getting list of commands
     private void executeCommand(Update update) {
         Command command = context.getBean(Command.class).setByUpdate(update);
 
-        switch (update.message().text()) {
-            case "/start": command.start(); break;
-            case "/guide": command.guide(); break;
-            case "/help": command.help(); break;
-            default: command.notACommand(); break;
+        try {
+            command.getMapCommands().get(update.message().text()).run();
+        } catch (NullPointerException ignored) {
+            command.notACommand();
         }
     }
 }

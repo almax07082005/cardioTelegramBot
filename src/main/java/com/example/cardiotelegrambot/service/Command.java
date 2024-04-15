@@ -9,11 +9,15 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.request.GetMyCommands;
 import com.pengrad.telegrambot.request.SendMessage;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @PropertySource("classpath:hidden.properties")
@@ -22,6 +26,9 @@ public class Command {
     private final TelegramBot bot;
     private final ConfigurableApplicationContext context;
     private Long id;
+
+    @Getter
+    private final Map<String, Runnable> mapCommands;
 
     @Value("${telegram.guide.file}")
     private String linkToFile;
@@ -36,6 +43,11 @@ public class Command {
     public Command(TelegramBot bot, ConfigurableApplicationContext context) {
         this.bot = bot;
         this.context = context;
+
+        mapCommands = new HashMap<>();
+        mapCommands.put("/start", this::start);
+        mapCommands.put("/guide", this::guide);
+        mapCommands.put("/help", this::help);
     }
 
     public Command setByUpdate(Update update) {
