@@ -8,6 +8,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,8 @@ public class Command {
 
     private final TelegramBot bot;
 
-    private Long id;
+    private Long chatId;
+    private Integer messageId;
     private String firstName;
     private final Map<Commands, Runnable> mapCommands;
 
@@ -44,13 +46,34 @@ public class Command {
     }
 
     public Command setByUpdate(Update update) {
-        id = update.message().chat().id();
-        firstName = update.message().from().firstName();
+        chatId = update
+                .message()
+                .chat()
+                .id();
+
+        messageId = update
+                .message()
+                .messageId();
+
+        firstName = update
+                .message()
+                .from()
+                .firstName();
+
+        return this;
+    }
+
+    public Command setByVariables(Long chatId, Integer messageId, String firstName) {
+        this.chatId = chatId;
+        this.messageId = messageId;
+        this.firstName = firstName;
+
         return this;
     }
 
     private void start() {
-        SendMessage message = new SendMessage(id, String.format("""
+        notACommand();
+        SendMessage message = new SendMessage(chatId, String.format("""
                 Привет, %s! Я бот-помощник доктора Баймуканова.%n
                 Выберите интересующий вас пункт.
                 """, firstName
@@ -75,13 +98,9 @@ public class Command {
     }
 
     private void notACommand() {
-        bot.execute(new SendMessage(
-                id,
-                """
-                        Кажется, Вы ввели неправильную команду.
-                        Ничего страшного, попробуйте еще раз!
-                        Чтобы все правильно сработало, нажмите кнопку меню внизу экрана, и Вы увидите список доступных команд.
-                        """
+        bot.execute(new DeleteMessage(
+                chatId,
+                messageId
         ));
     }
 }

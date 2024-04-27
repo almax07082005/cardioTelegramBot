@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.service;
+package com.example.cardiotelegrambot.service.file_system;
 
 import com.example.cardiotelegrambot.config.LogConfig;
 import com.example.cardiotelegrambot.config.StorageProperties;
