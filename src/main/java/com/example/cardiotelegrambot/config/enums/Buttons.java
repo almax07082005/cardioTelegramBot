@@ -6,5 +6,6 @@ public enum Buttons {
     assessRisks,
     makeAppointment,
     aboutMe,
-    help
+    help,
+    getBack
 }

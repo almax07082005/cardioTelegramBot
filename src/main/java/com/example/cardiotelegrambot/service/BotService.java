@@ -59,6 +59,7 @@ public class BotService {
                 .run();
     }
 
+    // TODO /start command can be executed more than once (that means more than one start message)
     private void executeCommand(Update update) {
         LogConfig.logInfo(
                 "@" +
