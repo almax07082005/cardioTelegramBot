@@ -2,7 +2,6 @@ package com.example.cardiotelegrambot.service;
 
 import com.example.cardiotelegrambot.config.LogConfig;
 import com.example.cardiotelegrambot.config.enums.Buttons;
-import com.example.cardiotelegrambot.config.enums.Commands;
 import com.example.cardiotelegrambot.exceptions.NotMemberException;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.ChatMember;
@@ -83,14 +82,14 @@ public class Button {
     }
 
     private void getBack() {
-        context.getBean(Command.class)
-                .setByVariables(
-                        chatId,
-                        messageId,
-                        firstName
-                )
-                .getCommand(Commands.start.toString())
-                .run();
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                Привет, %s! Я бот-помощник доктора Баймуканова.%n
+                Выберите интересующий вас пункт.
+                """, firstName
+        ));
+
+        message.replyMarkup(Command.getInlineKeyboardMarkupForMainMenu());
+        bot.execute(message);
     }
 
     private void getGuide() {

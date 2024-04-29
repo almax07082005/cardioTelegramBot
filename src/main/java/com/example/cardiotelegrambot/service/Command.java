@@ -63,12 +63,21 @@ public class Command {
         return this;
     }
 
-    public Command setByVariables(Long chatId, Integer messageId, String firstName) {
-        this.chatId = chatId;
-        this.messageId = messageId;
-        this.firstName = firstName;
+    public static InlineKeyboardMarkup getInlineKeyboardMarkupForMainMenu() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
-        return this;
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Пригласить друга").callbackData(Buttons.inviteFriend.name()),
+                new InlineKeyboardButton("Получить гайд").callbackData(Buttons.getGuide.name())
+        );
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton("Оценить сердечно-сосудистый риск").callbackData(Buttons.assessRisks.name()));
+        inlineKeyboardMarkup.addRow(new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name()));
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Обо мне").callbackData(Buttons.aboutMe.name()),
+                new InlineKeyboardButton("Помощь с ботом").callbackData(Buttons.help.name())
+        );
+
+        return inlineKeyboardMarkup;
     }
 
     private void start() {
@@ -79,21 +88,7 @@ public class Command {
                 """, firstName
         ));
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton("Пригласить друга").callbackData(Buttons.inviteFriend.name()),
-                new InlineKeyboardButton("Получить гайд").callbackData(Buttons.getGuide.name())
-        );
-
-        inlineKeyboardMarkup.addRow(new InlineKeyboardButton("Оценить сердечно-сосудистый риск").callbackData(Buttons.assessRisks.name()));
-        inlineKeyboardMarkup.addRow(new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name()));
-
-        inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton("Обо мне").callbackData(Buttons.aboutMe.name()),
-                new InlineKeyboardButton("Помощь с ботом").callbackData(Buttons.help.name())
-        );
-
-        message.replyMarkup(inlineKeyboardMarkup);
+        message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
         bot.execute(message);
     }
 
