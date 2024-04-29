@@ -41,6 +41,9 @@ public class Button {
     @Value("${telegram.creator.username}")
     private String creatorUsername;
 
+    @Value("${telegram.assessRisks.link}")
+    private String assessRisksLink;
+
     @Autowired
     public Button(TelegramBot bot) {
         this.bot = bot;
@@ -48,7 +51,7 @@ public class Button {
         buttons = new HashMap<>();
         buttons.put(Buttons.inviteFriend, null);
         buttons.put(Buttons.getGuide, this::getGuide);
-        buttons.put(Buttons.assessRisks, null);
+        buttons.put(Buttons.assessRisks, this::assessRisks);
         buttons.put(Buttons.makeAppointment, null);
         buttons.put(Buttons.aboutMe, null);
         buttons.put(Buttons.help, this::help);
@@ -76,6 +79,19 @@ public class Button {
                 .firstName();
 
         return this;
+    }
+
+    private void assessRisks() {
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                Оценить свой риск сердечно-сосудистых заболеваний Вы можете здесь:
+                %s
+                """, assessRisksLink
+        ));
+
+        message.replyMarkup(new InlineKeyboardMarkup(
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        ));
+        bot.execute(message);
     }
 
     private void help() {
