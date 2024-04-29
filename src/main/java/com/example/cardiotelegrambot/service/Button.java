@@ -12,7 +12,6 @@ import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.GetChatMember;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +23,6 @@ import java.util.Map;
 public class Button {
 
     private final TelegramBot bot;
-    private final ConfigurableApplicationContext context;
 
     private Long chatId;
     private Integer messageId;
@@ -44,9 +42,8 @@ public class Button {
     private String creatorUsername;
 
     @Autowired
-    public Button(TelegramBot bot, ConfigurableApplicationContext context) {
+    public Button(TelegramBot bot) {
         this.bot = bot;
-        this.context = context;
 
         buttons = new HashMap<>();
         buttons.put(Buttons.inviteFriend, null);
@@ -54,7 +51,7 @@ public class Button {
         buttons.put(Buttons.assessRisks, null);
         buttons.put(Buttons.makeAppointment, null);
         buttons.put(Buttons.aboutMe, null);
-        buttons.put(Buttons.help, null);
+        buttons.put(Buttons.help, this::help);
         buttons.put(Buttons.getBack, this::getBack);
     }
 
@@ -79,6 +76,20 @@ public class Button {
                 .firstName();
 
         return this;
+    }
+
+    private void help() {
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                Сожалеем, что у Вас что-то не работает так, как нужно.
+                С любыми вопросами Вы можете обратиться к моему создателю.
+                А вот и его аккаунт: %s
+                """, creatorUsername
+        ));
+
+        message.replyMarkup(new InlineKeyboardMarkup(
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        ));
+        bot.execute(message);
     }
 
     private void getBack() {
@@ -110,11 +121,10 @@ public class Button {
                             %s
                             """, linkToFile)
             );
-            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
-                    new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
-            );
 
-            message.replyMarkup(inlineKeyboardMarkup);
+            message.replyMarkup(new InlineKeyboardMarkup(
+                    new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+            ));
             bot.execute(message);
 
         } catch (NotMemberException exception) {
@@ -128,12 +138,11 @@ public class Button {
                             Проверьте, подписаны ли Вы на канал %s, там много полезной информации!
                             """, channelUsername)
             );
-            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup().addRow(
+
+            message.replyMarkup(new InlineKeyboardMarkup().addRow(
                     new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name()),
                     new InlineKeyboardButton("Я подписался").callbackData(Buttons.getGuide.name())
-            );
-
-            message.replyMarkup(inlineKeyboardMarkup);
+            ));
             bot.execute(message);
         }
     }
