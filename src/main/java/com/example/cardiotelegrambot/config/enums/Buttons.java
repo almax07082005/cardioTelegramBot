@@ -7,5 +7,7 @@ public enum Buttons {
     makeAppointment,
     aboutMe,
     help,
-    getBack
+    getBack,
+    reviews,
+    education
 }

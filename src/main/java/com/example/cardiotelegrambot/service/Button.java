@@ -8,13 +8,18 @@ import com.pengrad.telegrambot.model.ChatMember;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.InputMediaPhoto;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.GetChatMember;
+import com.pengrad.telegrambot.request.SendMediaGroup;
+import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +52,12 @@ public class Button {
     @Value("${telegram.makeAppointment.link}")
     private String makeAppointmentLink;
 
+    @Value("${telegram.reviews.link}")
+    private String reviewsLink;
+
+    @Value("${telegram.education.link}")
+    private String educationLink;
+
     @Autowired
     public Button(TelegramBot bot) {
         this.bot = bot;
@@ -56,9 +67,11 @@ public class Button {
         buttons.put(Buttons.getGuide, this::getGuide);
         buttons.put(Buttons.assessRisks, this::assessRisks);
         buttons.put(Buttons.makeAppointment, this::makeAppointment);
-        buttons.put(Buttons.aboutMe, null);
+        buttons.put(Buttons.aboutMe, this::aboutMe);
         buttons.put(Buttons.help, this::help);
         buttons.put(Buttons.getBack, this::getBack);
+        buttons.put(Buttons.reviews, this::reviews);
+        buttons.put(Buttons.education, this::education);
     }
 
     public Runnable getButton(Buttons button) {
@@ -82,6 +95,67 @@ public class Button {
                 .firstName();
 
         return this;
+    }
+
+    // TODO delete pictures (using database) - the same problem with /start command
+    private void reviews() {
+        bot.execute(new SendMediaGroup(
+                chatId,
+                new InputMediaPhoto(new File("src/main/resources/11012023-1416.png")),
+                new InputMediaPhoto(new File("src/main/resources/02242024-1947.png")),
+                new InputMediaPhoto(new File("src/main/resources/03052024-1018.png")),
+                new InputMediaPhoto(new File("src/main/resources/03172024-0735.png")),
+                new InputMediaPhoto(new File("src/main/resources/03302024-2221.png"))
+        ));
+        bot.execute(new DeleteMessage(chatId, messageId));
+
+        SendMessage message = new SendMessage(chatId, String.format("""
+                Вот несколько отзывов с проверенного сайта обо мне!
+                Больше отзывов можете посмотреть тут:
+                %s
+                """, reviewsLink
+        ));
+
+        message.replyMarkup(new InlineKeyboardMarkup().addRow(
+                new InlineKeyboardButton("Назад").callbackData(Buttons.aboutMe.name()),
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        ));
+        bot.execute(message);
+    }
+
+    private void education() {
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                Здесь все о моем образовании!
+                Подробно всю информацию Вы можете прочитать на моем сайте:
+                %s
+                """, educationLink
+        ));
+
+        message.replyMarkup(new InlineKeyboardMarkup().addRow(
+                new InlineKeyboardButton("Назад").callbackData(Buttons.aboutMe.name()),
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        ));
+        bot.execute(message);
+    }
+
+    private void aboutMe() {
+        EditMessageText message = new EditMessageText(chatId, messageId, """
+                Меня зовут Азамат Баймуканов, и здесь будет информация обо мне.
+                Больше информации можете прочитать, нажав на соответствующую кнопку.
+                """
+        );
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Отзывы").callbackData(Buttons.reviews.name()),
+                new InlineKeyboardButton("Образование").callbackData(Buttons.education.name())
+        );
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        );
+
+        message.replyMarkup(inlineKeyboardMarkup);
+        bot.execute(message);
     }
 
     private void makeAppointment() {
@@ -126,7 +200,7 @@ public class Button {
 
     private void getBack() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Привет, %s! Я бот-помощник доктора Баймуканова.%n
+                И снова здравствуйте, %s! Опять я, бот-помощник доктора Баймуканова, спешу Вам на помощь!
                 Выберите интересующий вас пункт.
                 """, firstName
         ));
@@ -149,7 +223,7 @@ public class Button {
                     chatId,
                     messageId,
                     String.format("""
-                            А вот и ваш гайд! (доступен по ссылке на Яндекс диске)
+                            А вот и Ваш гайд! (доступен по ссылке на Яндекс диске)
                             %s
                             """, linkToFile)
             );
