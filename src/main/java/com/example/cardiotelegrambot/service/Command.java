@@ -70,8 +70,12 @@ public class Command {
                 new InlineKeyboardButton("Пригласить друга").callbackData(Buttons.inviteFriend.name()),
                 new InlineKeyboardButton("Получить гайд").callbackData(Buttons.getGuide.name())
         );
-        inlineKeyboardMarkup.addRow(new InlineKeyboardButton("Оценить сердечно-сосудистый риск").callbackData(Buttons.assessRisks.name()));
-        inlineKeyboardMarkup.addRow(new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name()));
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Оценить сердечно-сосудистый риск").callbackData(Buttons.assessRisks.name())
+        );
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name())
+        );
         inlineKeyboardMarkup.addRow(
                 new InlineKeyboardButton("Обо мне").callbackData(Buttons.aboutMe.name()),
                 new InlineKeyboardButton("Помощь с ботом").callbackData(Buttons.help.name())
@@ -81,15 +85,15 @@ public class Command {
     }
 
     private void start() {
-        notACommand();
         SendMessage message = new SendMessage(chatId, String.format("""
-                Привет, %s! Я бот-помощник доктора Баймуканова.%n
+                Здравствуйте, %s! Я бот-помощник доктора Баймуканова.
                 Выберите интересующий вас пункт.
                 """, firstName
         ));
 
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
         bot.execute(message);
+        notACommand();
     }
 
     private void notACommand() {
