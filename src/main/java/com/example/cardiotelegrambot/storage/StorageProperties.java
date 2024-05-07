@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.config;
+package com.example.cardiotelegrambot.storage;
 
 import lombok.Getter;
 import lombok.Setter;

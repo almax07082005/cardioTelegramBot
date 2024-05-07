@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.service.file_system;
+package com.example.cardiotelegrambot.storage;
 
 import java.nio.file.Path;
 

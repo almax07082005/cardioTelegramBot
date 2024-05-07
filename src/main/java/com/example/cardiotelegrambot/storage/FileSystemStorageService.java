@@ -1,7 +1,6 @@
-package com.example.cardiotelegrambot.service.file_system;
+package com.example.cardiotelegrambot.storage;
 
 import com.example.cardiotelegrambot.config.LogConfig;
-import com.example.cardiotelegrambot.config.StorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
