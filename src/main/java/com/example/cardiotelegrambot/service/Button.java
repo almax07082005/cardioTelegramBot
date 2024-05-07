@@ -97,7 +97,6 @@ public class Button {
         return this;
     }
 
-    // TODO delete pictures (using database) - the same problem with /start command
     private void reviews() {
         bot.execute(new SendMediaGroup(
                 chatId,
