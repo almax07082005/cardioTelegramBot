@@ -63,7 +63,7 @@ public class Button {
         this.bot = bot;
 
         buttons = new HashMap<>();
-        buttons.put(Buttons.inviteFriend, null);
+        buttons.put(Buttons.inviteFriend, this::inviteFriend);
         buttons.put(Buttons.getGuide, this::getGuide);
         buttons.put(Buttons.assessRisks, this::assessRisks);
         buttons.put(Buttons.makeAppointment, this::makeAppointment);
@@ -95,6 +95,15 @@ public class Button {
                 .firstName();
 
         return this;
+    }
+
+    private void inviteFriend() {
+        EditMessageText message = new EditMessageText(chatId, messageId, "Извините, но пока эта функция в работе.");
+
+        message.replyMarkup(new InlineKeyboardMarkup(
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        ));
+        bot.execute(message);
     }
 
     private void reviews() {
