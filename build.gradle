@@ -8,7 +8,8 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+    sourceCompatibility = JavaVersion.VERSION_20
+    targetCompatibility = JavaVersion.VERSION_20
 }
 
 repositories {
@@ -26,4 +27,25 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+bootJar {
+	archiveFileName = "cardioBot.jar"
+}
+
+tasks.register("buildDockerImage", Exec) {
+	group "docker"
+	dependsOn bootJar
+	commandLine "docker", "build", "-t", "cardio-bot", "."
+}
+
+tasks.register("startDockerImage", Exec) {
+	group "docker"
+	dependsOn buildDockerImage
+	commandLine "docker", "compose", "up", "-d"
+}
+
+tasks.register("stopDockerImage", Exec) {
+	group "docker"
+	commandLine "docker", "compose", "down"
 }
