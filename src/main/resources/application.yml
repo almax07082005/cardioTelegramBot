@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: "cardioTelegramBot"
+  file:
+    location: "src/main/resources"
+  datasource:
+    url: "jdbc:postgresql://cardio-db:5432/cardio-db"
+    username: "admin"
+    password: "secret"
+    driver-class-name: "org.postgresql.Driver"
+  jpa:
+    database: "postgresql"
+    hibernate:
+      ddl-auto: "update"
+
+telegram:
+  creator:
+    username: "@baymukanov"
+  channel:
+    id: "-1001894647431"
+    username: "@abaymukanov"
+  assessRisks:
+    link: "https://baymukanov.ru/survey"
+  makeAppointment:
+    link: "https://baymukanov.ru/"
+  reviews:
+    link: "https://prodoctorov.ru/moskva/vrach/457300-baymukanov/#rating"
+  education:
+    link: "https://baymukanov.ru/#education"

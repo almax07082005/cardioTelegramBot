@@ -1,3 +1,5 @@
+name: "cardio-bot-app"
+
 services:
   cardio-db:
     image: 'postgres:latest'
