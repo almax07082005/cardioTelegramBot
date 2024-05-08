@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,14 +108,27 @@ public class Button {
         bot.execute(message);
     }
 
+    private byte[] getFileFromResources(String fileName) {
+        try (InputStream is = getClass().getResourceAsStream(fileName)) {
+            if (is == null) {
+                throw new FileNotFoundException("File not found " + fileName);
+            }
+
+            return is.readAllBytes();
+        } catch (IOException exception) {
+            LogConfig.logError(exception);
+            return null;
+        }
+    }
+
     private void reviews() {
         bot.execute(new SendMediaGroup(
                 chatId,
-                new InputMediaPhoto(new File("src/main/resources/11012023-1416.png")),
-                new InputMediaPhoto(new File("src/main/resources/02242024-1947.png")),
-                new InputMediaPhoto(new File("src/main/resources/03052024-1018.png")),
-                new InputMediaPhoto(new File("src/main/resources/03172024-0735.png")),
-                new InputMediaPhoto(new File("src/main/resources/03302024-2221.png"))
+                new InputMediaPhoto(getFileFromResources("/11012023-1416.png")),
+                new InputMediaPhoto(getFileFromResources("/02242024-1947.png")),
+                new InputMediaPhoto(getFileFromResources("/03052024-1018.png")),
+                new InputMediaPhoto(getFileFromResources("/03172024-0735.png")),
+                new InputMediaPhoto(getFileFromResources("/03302024-2221.png"))
         ));
         bot.execute(new DeleteMessage(chatId, messageId));
 
@@ -224,6 +239,7 @@ public class Button {
                     .status();
 
             if (!(status == ChatMember.Status.creator || status == ChatMember.Status.administrator || status == ChatMember.Status.member)) {
+                // TODO add exception text
                 throw new NotMemberException();
             }
 
