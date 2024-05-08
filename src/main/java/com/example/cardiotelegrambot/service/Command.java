@@ -3,13 +3,17 @@ package com.example.cardiotelegrambot.service;
 import com.example.cardiotelegrambot.config.LogConfig;
 import com.example.cardiotelegrambot.config.enums.Buttons;
 import com.example.cardiotelegrambot.config.enums.Commands;
+import com.example.cardiotelegrambot.entity.UserEntity;
+import com.example.cardiotelegrambot.exceptions.NoSuchUserException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
+import com.example.cardiotelegrambot.exceptions.UserExistException;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +24,18 @@ import java.util.Map;
 public class Command {
 
     private final TelegramBot bot;
+    private final UserService userService;
 
     private Long chatId;
     private Integer messageId;
     private String firstName;
+    private String username;
     private final Map<Commands, Runnable> mapCommands;
 
     @Autowired
-    public Command(TelegramBot bot) {
+    public Command(TelegramBot bot, UserService userService) {
         this.bot = bot;
+        this.userService = userService;
 
         mapCommands = new HashMap<>();
         mapCommands.put(Commands.start, this::start);
@@ -60,6 +67,11 @@ public class Command {
                 .from()
                 .firstName();
 
+        username = update
+                .message()
+                .from()
+                .username();
+
         return this;
     }
 
@@ -85,6 +97,7 @@ public class Command {
     }
 
     private void start() {
+
         SendMessage message = new SendMessage(chatId, String.format("""
                 Здравствуйте, %s! Я бот-помощник доктора Баймуканова.
                 Выберите интересующий вас пункт.
@@ -92,8 +105,30 @@ public class Command {
         ));
 
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
-        bot.execute(message);
+        SendResponse response = bot.execute(message);
         notACommand();
+
+        UserEntity newUser = new UserEntity(
+                username,
+                response.message().chat().id(),
+                response.message().messageId()
+        );
+
+        try {
+            UserEntity user = userService.getUser(username);
+            bot.execute(new DeleteMessage(
+                    user.getChatId(),
+                    user.getMessageId()
+            ));
+            userService.updateUser(newUser);
+
+        } catch (NoSuchUserException exception) {
+            try {
+                userService.createUser(newUser);
+            } catch (UserExistException nestedException) {
+                LogConfig.logError(nestedException.getMessage() + " (unpredictable behavior)");
+            }
+        }
     }
 
     private void notACommand() {
