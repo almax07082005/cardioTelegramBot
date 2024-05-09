@@ -108,11 +108,11 @@ public class Command {
         SendResponse response = bot.execute(message);
         notACommand();
 
-        UserEntity newUser = new UserEntity(
-                username,
-                response.message().chat().id(),
-                response.message().messageId()
-        );
+        UserEntity newUser = UserEntity.builder()
+                .username(username)
+                .chatId(response.message().chat().id())
+                .messageId(response.message().messageId())
+                .build();
 
         try {
             UserEntity user = userService.getUser(username);

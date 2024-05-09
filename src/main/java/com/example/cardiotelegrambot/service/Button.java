@@ -2,9 +2,13 @@ package com.example.cardiotelegrambot.service;
 
 import com.example.cardiotelegrambot.config.LogConfig;
 import com.example.cardiotelegrambot.config.enums.Buttons;
+import com.example.cardiotelegrambot.entity.ReviewEntity;
+import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
 import com.example.cardiotelegrambot.exceptions.NotMemberException;
+import com.example.cardiotelegrambot.exceptions.ReviewExistException;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.ChatMember;
+import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
@@ -14,6 +18,7 @@ import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.GetChatMember;
 import com.pengrad.telegrambot.request.SendMediaGroup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.MessagesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -22,7 +27,9 @@ import org.springframework.stereotype.Component;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @PropertySource("classpath:hidden.properties")
@@ -30,10 +37,12 @@ import java.util.Map;
 public class Button {
 
     private final TelegramBot bot;
+    private final ReviewService reviewService;
 
     private Long chatId;
     private Integer messageId;
     private String firstName;
+    private String username;
     private final Map<Buttons, Runnable> buttons;
 
     @Value("${telegram.channel.username}")
@@ -61,8 +70,9 @@ public class Button {
     private String educationLink;
 
     @Autowired
-    public Button(TelegramBot bot) {
+    public Button(TelegramBot bot, ReviewService reviewService) {
         this.bot = bot;
+        this.reviewService = reviewService;
 
         buttons = new HashMap<>();
         buttons.put(Buttons.inviteFriend, this::inviteFriend);
@@ -96,6 +106,11 @@ public class Button {
                 .from()
                 .firstName();
 
+        username = update
+                .callbackQuery()
+                .from()
+                .username();
+
         return this;
     }
 
@@ -121,8 +136,26 @@ public class Button {
         }
     }
 
+    private void createReview(Message[] messages) {
+        List<Integer> messageIds = new ArrayList<>();
+        for (Message message : messages) {
+            messageIds.add(message.messageId());
+        }
+
+        try {
+            reviewService.createReview(ReviewEntity.builder()
+                    .username(username)
+                    .chatId(chatId)
+                    .messageIds(messageIds)
+                    .build()
+            );
+        } catch (ReviewExistException exception) {
+            LogConfig.logError(exception.getMessage() + " (unpredictable behavior)");
+        }
+    }
+
     private void reviews() {
-        bot.execute(new SendMediaGroup(
+        MessagesResponse response = bot.execute(new SendMediaGroup(
                 chatId,
                 new InputMediaPhoto(getFileFromResources("/11012023-1416.png")),
                 new InputMediaPhoto(getFileFromResources("/02242024-1947.png")),
@@ -131,6 +164,7 @@ public class Button {
                 new InputMediaPhoto(getFileFromResources("/03302024-2221.png"))
         ));
         bot.execute(new DeleteMessage(chatId, messageId));
+        createReview(response.messages());
 
         SendMessage message = new SendMessage(chatId, String.format("""
                 Вот несколько отзывов с проверенного сайта обо мне!
@@ -161,7 +195,23 @@ public class Button {
         bot.execute(message);
     }
 
+    private void deleteReview() {
+        try {
+            ReviewEntity review = reviewService.getReview(username);
+
+            for (Integer messageId : review.getMessageIds()) {
+                bot.execute(new DeleteMessage(
+                        review.getChatId(),
+                        messageId
+                ));
+            }
+
+            reviewService.deleteReview(username);
+        } catch (NoSuchReviewException ignored) {}
+    }
+
     private void aboutMe() {
+        deleteReview();
         EditMessageText message = new EditMessageText(chatId, messageId, """
                 Меня зовут Азамат Баймуканов, и здесь будет информация обо мне.
                 Больше информации можете прочитать, нажав на соответствующую кнопку.
@@ -222,6 +272,7 @@ public class Button {
     }
 
     private void getBack() {
+        deleteReview();
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
                 И снова здравствуйте, %s! Опять я, бот-помощник доктора Баймуканова, спешу Вам на помощь!
                 Выберите интересующий вас пункт.
