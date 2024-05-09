@@ -290,8 +290,7 @@ public class Button {
                     .status();
 
             if (!(status == ChatMember.Status.creator || status == ChatMember.Status.administrator || status == ChatMember.Status.member)) {
-                // TODO add exception text
-                throw new NotMemberException();
+                throw new NotMemberException(username);
             }
 
             EditMessageText message = new EditMessageText(

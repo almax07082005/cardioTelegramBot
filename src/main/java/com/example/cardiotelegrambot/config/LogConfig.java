@@ -9,7 +9,7 @@ import java.util.Arrays;
 @Slf4j
 public abstract class LogConfig {
 
-    public static <T> void logError(Exception exception) {
+    public static void logError(Exception exception) {
         log.error("{}\n{}",
                 exception.getMessage(),
                 String.join("\n", Arrays
@@ -18,7 +18,7 @@ public abstract class LogConfig {
         ));
     }
 
-    public static <T> void logWarn(Exception exception) {
+    public static void logWarn(Exception exception) {
         log.warn("{}\n{}",
                 exception.getMessage(),
                 String.join("\n", Arrays

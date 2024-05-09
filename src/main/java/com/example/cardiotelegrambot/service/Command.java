@@ -47,7 +47,7 @@ public class Command {
             commandKey = Commands.fromString(command);
             return mapCommands.get(commandKey);
         } catch (NotCommandException exception) {
-            LogConfig.logWarn(exception.getMessage());
+            LogConfig.logWarn("@" + username + ": " + exception.getMessage());
             return this::notACommand;
         }
     }
