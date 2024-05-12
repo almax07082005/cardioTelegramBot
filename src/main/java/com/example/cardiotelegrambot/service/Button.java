@@ -149,9 +149,28 @@ public class Button {
                     .messageIds(messageIds)
                     .build()
             );
+            LogConfig.logInfo(String.format("Review for user @%s was added to database.", username));
+
         } catch (ReviewExistException exception) {
             LogConfig.logError(exception.getMessage() + " (unpredictable behavior)");
         }
+    }
+
+    private void deleteReview() {
+        try {
+            ReviewEntity review = reviewService.getReview(username);
+
+            for (Integer messageId : review.getMessageIds()) {
+                bot.execute(new DeleteMessage(
+                        review.getChatId(),
+                        messageId
+                ));
+            }
+
+            reviewService.deleteReview(username);
+            LogConfig.logInfo(String.format("Review for user @%s was deleted from database.", username));
+
+        } catch (NoSuchReviewException ignored) {}
     }
 
     private void reviews() {
@@ -193,21 +212,6 @@ public class Button {
                 new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
         ));
         bot.execute(message);
-    }
-
-    private void deleteReview() {
-        try {
-            ReviewEntity review = reviewService.getReview(username);
-
-            for (Integer messageId : review.getMessageIds()) {
-                bot.execute(new DeleteMessage(
-                        review.getChatId(),
-                        messageId
-                ));
-            }
-
-            reviewService.deleteReview(username);
-        } catch (NoSuchReviewException ignored) {}
     }
 
     private void aboutMe() {

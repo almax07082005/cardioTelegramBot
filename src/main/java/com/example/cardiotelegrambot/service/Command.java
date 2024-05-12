@@ -121,10 +121,12 @@ public class Command {
                     user.getMessageId()
             ));
             userService.updateUser(newUser);
+            LogConfig.logInfo(String.format("User @%s was updated in database.", username));
 
         } catch (NoSuchUserException exception) {
             try {
                 userService.createUser(newUser);
+                LogConfig.logInfo(String.format("User @%s was added to database.", username));
             } catch (UserExistException nestedException) {
                 LogConfig.logError(nestedException.getMessage() + " (unpredictable behavior)");
             }
