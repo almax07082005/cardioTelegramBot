@@ -14,32 +14,49 @@ import java.time.LocalDateTime;
 @PropertySource("classpath:hidden.properties")
 public class LogConfig {
 
+    private enum LogType {
+        ERROR,
+        WARN,
+        INFO
+    }
+
     @Value("${telegram.bot.admin}")
     private Long chatId;
 
     private final TelegramBot bot;
+    private final TelegramBot urgentBot;
 
     @Autowired
-    public LogConfig(@Qualifier("loggerBotBean") TelegramBot bot) {
+    public LogConfig(@Qualifier("loggerBotBean") TelegramBot bot, @Qualifier("urgentBotBean") TelegramBot urgentBot) {
         this.bot = bot;
+        this.urgentBot = urgentBot;
     }
 
-    private void sendMessage(String message) {
-        bot.execute(new SendMessage(
-                chatId,
-                message
-        ));
+    private void sendMessage(LogType logType, String message) {
+        String finalMessage = String.format("%s %s : %s", LocalDateTime.now(), logType, message);
+
+        if (logType == LogType.ERROR) {
+            urgentBot.execute(new SendMessage(
+                    chatId,
+                    finalMessage
+            ));
+        } else {
+            bot.execute(new SendMessage(
+                    chatId,
+                    finalMessage
+            ));
+        }
     }
 
     public void error(String message) {
-        sendMessage(LocalDateTime.now() + " ERROR : " + message);
+        sendMessage(LogType.ERROR, message);
     }
 
     public void warn(String message) {
-        sendMessage(LocalDateTime.now() + " WARN : " + message);
+        sendMessage(LogType.WARN, message);
     }
 
     public void info(String message) {
-        sendMessage(LocalDateTime.now() + " INFO : " + message);
+        sendMessage(LogType.INFO, message);
     }
 }
