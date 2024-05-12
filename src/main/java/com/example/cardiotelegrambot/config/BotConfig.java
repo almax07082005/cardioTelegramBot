@@ -13,8 +13,16 @@ public class BotConfig {
     @Value("${telegram.bot.token}")
     private String token;
 
-    @Bean
+    @Value("${telegram.logger-bot.token}")
+    private String tokenLogger;
+
+    @Bean("mainBotBean")
     public TelegramBot newTelegramBot() {
         return new TelegramBot(token);
+    }
+
+    @Bean("loggerBotBean")
+    public TelegramBot newTelegramBotLogger() {
+        return new TelegramBot(tokenLogger);
     }
 }

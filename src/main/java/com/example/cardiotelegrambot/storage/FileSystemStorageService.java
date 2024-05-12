@@ -1,6 +1,6 @@
 package com.example.cardiotelegrambot.storage;
 
-import com.example.cardiotelegrambot.config.LogConfig;
+import com.example.cardiotelegrambot.config.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
@@ -12,11 +12,14 @@ import java.nio.file.Paths;
 
 @Service
 public class FileSystemStorageService implements StorageService {
+
     private final Path rootLocation;
+    private final Logger logger;
 
     @Autowired
-    public FileSystemStorageService(StorageProperties properties) {
+    public FileSystemStorageService(StorageProperties properties, Logger logger) {
         this.rootLocation = Paths.get(properties.getLocation());
+        this.logger = logger;
     }
 
     @Override
@@ -24,7 +27,7 @@ public class FileSystemStorageService implements StorageService {
         try {
             Files.createDirectories(rootLocation);
         } catch (IOException exception) {
-            LogConfig.logError(exception);
+            logger.logError(exception);
         }
     }
 
@@ -34,7 +37,7 @@ public class FileSystemStorageService implements StorageService {
             Path destinationFile = this.rootLocation.resolve(filename).normalize().toAbsolutePath();
             Files.write(destinationFile, content.getBytes());
         } catch (IOException exception) {
-            LogConfig.logError(exception);
+            logger.logError(exception);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.example.cardiotelegrambot.service;
 
-import com.example.cardiotelegrambot.config.LogConfig;
+import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.config.enums.Buttons;
 import com.example.cardiotelegrambot.config.enums.Commands;
 import com.example.cardiotelegrambot.entity.UserEntity;
@@ -15,6 +15,7 @@ import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class Command {
 
     private final TelegramBot bot;
     private final UserService userService;
+    private final Logger logger;
 
     private Long chatId;
     private Integer messageId;
@@ -33,9 +35,10 @@ public class Command {
     private final Map<Commands, Runnable> mapCommands;
 
     @Autowired
-    public Command(TelegramBot bot, UserService userService) {
+    public Command(@Qualifier("mainBotBean") TelegramBot bot, UserService userService, Logger logger) {
         this.bot = bot;
         this.userService = userService;
+        this.logger = logger;
 
         mapCommands = new HashMap<>();
         mapCommands.put(Commands.start, this::start);
@@ -47,7 +50,7 @@ public class Command {
             commandKey = Commands.fromString(command);
             return mapCommands.get(commandKey);
         } catch (NotCommandException exception) {
-            LogConfig.logWarn("@" + username + ": " + exception.getMessage());
+            logger.logWarn("@" + username + ": " + exception.getMessage());
             return this::notACommand;
         }
     }
@@ -121,14 +124,14 @@ public class Command {
                     user.getMessageId()
             ));
             userService.updateUser(newUser);
-            LogConfig.logInfo(String.format("User @%s was updated in database.", username));
+            logger.logInfo(String.format("User @%s was updated in database.", username));
 
         } catch (NoSuchUserException exception) {
             try {
                 userService.createUser(newUser);
-                LogConfig.logInfo(String.format("User @%s was added to database.", username));
+                logger.logInfo(String.format("User @%s was added to database.", username));
             } catch (UserExistException nestedException) {
-                LogConfig.logError(nestedException.getMessage() + " (unpredictable behavior)");
+                logger.logError(nestedException.getMessage() + " (unpredictable behavior)");
             }
         }
     }

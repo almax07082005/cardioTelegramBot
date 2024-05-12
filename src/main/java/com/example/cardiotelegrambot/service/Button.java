@@ -1,6 +1,6 @@
 package com.example.cardiotelegrambot.service;
 
-import com.example.cardiotelegrambot.config.LogConfig;
+import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.config.enums.Buttons;
 import com.example.cardiotelegrambot.entity.ReviewEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
@@ -20,6 +20,7 @@ import com.pengrad.telegrambot.request.SendMediaGroup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.MessagesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,7 @@ public class Button {
 
     private final TelegramBot bot;
     private final ReviewService reviewService;
+    private final Logger logger;
 
     private Long chatId;
     private Integer messageId;
@@ -70,9 +72,10 @@ public class Button {
     private String educationLink;
 
     @Autowired
-    public Button(TelegramBot bot, ReviewService reviewService) {
+    public Button(@Qualifier("mainBotBean") TelegramBot bot, ReviewService reviewService, Logger logger) {
         this.bot = bot;
         this.reviewService = reviewService;
+        this.logger = logger;
 
         buttons = new HashMap<>();
         buttons.put(Buttons.inviteFriend, this::inviteFriend);
@@ -131,7 +134,7 @@ public class Button {
 
             return is.readAllBytes();
         } catch (IOException exception) {
-            LogConfig.logError(exception);
+            logger.logError(exception);
             return null;
         }
     }
@@ -149,10 +152,10 @@ public class Button {
                     .messageIds(messageIds)
                     .build()
             );
-            LogConfig.logInfo(String.format("Review for user @%s was added to database.", username));
+            logger.logInfo(String.format("Review for user @%s was added to database.", username));
 
         } catch (ReviewExistException exception) {
-            LogConfig.logError(exception.getMessage() + " (unpredictable behavior)");
+            logger.logError(exception.getMessage() + " (unpredictable behavior)");
         }
     }
 
@@ -168,7 +171,7 @@ public class Button {
             }
 
             reviewService.deleteReview(username);
-            LogConfig.logInfo(String.format("Review for user @%s was deleted from database.", username));
+            logger.logInfo(String.format("Review for user @%s was deleted from database.", username));
 
         } catch (NoSuchReviewException ignored) {}
     }
@@ -312,7 +315,7 @@ public class Button {
             bot.execute(message);
 
         } catch (NotMemberException exception) {
-            LogConfig.logWarn(exception.getMessage());
+            logger.logWarn(exception.getMessage());
 
             EditMessageText message = new EditMessageText(
                     chatId,

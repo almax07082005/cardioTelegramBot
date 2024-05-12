@@ -1,53 +1,45 @@
 package com.example.cardiotelegrambot.config;
 
-import lombok.extern.slf4j.Slf4j;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SendMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
 
 @Configuration
-@Slf4j
-public abstract class LogConfig {
+@PropertySource("classpath:hidden.properties")
+public class LogConfig {
 
-    public static void logError(Exception exception) {
-        log.error("{}\n{}",
-                exception.getMessage(),
-                String.join("\n", Arrays
-                        .toString(exception.getStackTrace())
-                        .split(" ")
+    @Value("${telegram.bot.admin}")
+    private Long chatId;
+
+    private final TelegramBot bot;
+
+    @Autowired
+    public LogConfig(@Qualifier("loggerBotBean") TelegramBot bot) {
+        this.bot = bot;
+    }
+
+    private void sendMessage(String message) {
+        bot.execute(new SendMessage(
+                chatId,
+                message
         ));
     }
 
-    public static void logWarn(Exception exception) {
-        log.warn("{}\n{}",
-                exception.getMessage(),
-                String.join("\n", Arrays
-                        .toString(exception.getStackTrace())
-                        .split(" ")
-        ));
+    public void error(String message) {
+        sendMessage(LocalDateTime.now() + " ERROR : " + message);
     }
 
-    public static <T> void logWarn(T warn) {
-        try {
-            log.warn(warn.toString());
-        } catch (Exception ignored) {
-            log.warn("No info message provided");
-        }
+    public void warn(String message) {
+        sendMessage(LocalDateTime.now() + " WARN : " + message);
     }
 
-    public static <T> void logInfo(T info) {
-        try {
-            log.info(info.toString());
-        } catch (Exception ignored) {
-            log.info("No info message provided");
-        }
-    }
-
-    public static <T> void logError(T error) {
-        try {
-            log.error(error.toString());
-        } catch (NullPointerException ignored) {
-            log.error("No error message provided");
-        }
+    public void info(String message) {
+        sendMessage(LocalDateTime.now() + " INFO : " + message);
     }
 }

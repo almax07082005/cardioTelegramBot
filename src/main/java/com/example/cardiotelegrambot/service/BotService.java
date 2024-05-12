@@ -1,24 +1,28 @@
 package com.example.cardiotelegrambot.service;
 
-import com.example.cardiotelegrambot.config.LogConfig;
+import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.config.enums.Buttons;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BotService {
 
     private final TelegramBot bot;
-    private final ConfigurableApplicationContext context;
+    private final Button button;
+    private final Command command;
+    private final Logger logger;
 
     @Autowired
-    public BotService(TelegramBot bot, ConfigurableApplicationContext context) {
+    public BotService(@Qualifier("mainBotBean") TelegramBot bot, Button button, Command command, Logger logger) {
         this.bot = bot;
-        this.context = context;
+        this.button = button;
+        this.command = command;
+        this.logger = logger;
     }
 
     public void startBot() {
@@ -29,7 +33,7 @@ public class BotService {
                     else executeCommand(update);
                 }
             } catch (Exception exception) {
-                LogConfig.logError(exception);
+                logger.logError(exception);
             }
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         }, exception -> {
@@ -37,13 +41,13 @@ public class BotService {
                 exception.response().errorCode();
                 exception.response().description();
             } else {
-                LogConfig.logError(exception);
+                logger.logError(exception);
             }
         });
     }
 
     private void executeButton(Update update) {
-        LogConfig.logInfo(
+        logger.logInfo(
                 "@" +
                 update.callbackQuery().from().username() +
                 " pressed button: \"" +
@@ -51,7 +55,7 @@ public class BotService {
                 "\""
         );
 
-        context.getBean(Button.class)
+        button
                 .setByUpdate(update)
                 .getButton(Buttons.valueOf(update
                         .callbackQuery()
@@ -60,7 +64,7 @@ public class BotService {
     }
 
     private void executeCommand(Update update) {
-        LogConfig.logInfo(
+        logger.logInfo(
                 "@" +
                 update.message().from().username() +
                 " sent message: \"" +
@@ -68,7 +72,7 @@ public class BotService {
                 "\""
         );
 
-        context.getBean(Command.class)
+        command
                 .setByUpdate(update)
                 .getCommand(update
                         .message()
