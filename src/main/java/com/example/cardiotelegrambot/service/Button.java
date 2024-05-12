@@ -192,8 +192,8 @@ public class Button {
         createReview(response.messages());
 
         SendMessage message = new SendMessage(chatId, String.format("""
-                Вот несколько отзывов с проверенного сайта обо мне!
-                Больше отзывов можете посмотреть тут:
+                Вот несколько отзывов с проверенного сайта!
+                С остальными отзывами можно ознакомиться здесь:
                 %s
                 """, reviewsLink
         ));
@@ -207,8 +207,8 @@ public class Button {
 
     private void education() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Здесь все о моем образовании!
-                Подробно всю информацию Вы можете прочитать на моем сайте:
+                Здесь всё об образовании Баймуканова Азамата.
+                Ознакомиться по ссылке:
                 %s
                 """, educationLink
         ));
@@ -223,8 +223,8 @@ public class Button {
     private void aboutMe() {
         deleteReview();
         EditMessageText message = new EditMessageText(chatId, messageId, """
-                Меня зовут Азамат Баймуканов, и здесь будет информация обо мне.
-                Больше информации можете прочитать, нажав на соответствующую кнопку.
+                Здесь информация обо мне.
+                Выберите интересующее Вас меню.
                 """
         );
 
@@ -256,7 +256,7 @@ public class Button {
 
     private void assessRisks() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Оценить свой риск сердечно-сосудистых заболеваний Вы можете здесь:
+                Оценить свой сердечно-сосудистый риск Вы сможете здесь:
                 %s
                 """, assessRisksLink
         ));
@@ -284,8 +284,8 @@ public class Button {
     private void getBack() {
         deleteReview();
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                И снова здравствуйте, %s! Опять я, бот-помощник доктора Баймуканова, спешу Вам на помощь!
-                Выберите интересующий вас пункт.
+                И снова здравствуйте, %s! Опять я, бот-помощник кардиолога Азамата Баймуканова.%n
+                Выберите интересующий вас пункт меню.
                 """, firstName
         ));
 
@@ -324,7 +324,7 @@ public class Button {
                     chatId,
                     messageId,
                     String.format("""
-                            Извините, но, кажется, Вы не подписаны на наш канал.
+                            Извините, но Вы не подписаны на канал "Заметки Кардиолога".
                             Проверьте, подписаны ли Вы на канал %s, там много полезной информации!
                             """, channelUsername)
             );

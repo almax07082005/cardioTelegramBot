@@ -106,8 +106,8 @@ public class Command {
     private void start() {
 
         SendMessage message = new SendMessage(chatId, String.format("""
-                Здравствуйте, %s! Я бот-помощник доктора Баймуканова.
-                Выберите интересующий вас пункт.
+                Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.%n
+                Выберите интересующий вас пункт меню.
                 """, firstName
         ));
 
