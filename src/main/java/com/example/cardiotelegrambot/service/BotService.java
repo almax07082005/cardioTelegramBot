@@ -47,14 +47,11 @@ public class BotService {
     }
 
     private void executeButton(Update update) {
-        logger.logInfo(
-                "@" +
-                update.callbackQuery().from().username() +
-                " pressed button: \"" +
-                update.callbackQuery().data() +
-                "\""
-        );
-
+        logger.logInfo(String.format(
+                "\"%s\" pressed button: \"%s\"",
+                update.callbackQuery().from().username(),
+                update.callbackQuery().data()
+        ));
         button
                 .setByUpdate(update)
                 .getButton(Buttons.valueOf(update
@@ -64,14 +61,11 @@ public class BotService {
     }
 
     private void executeCommand(Update update) {
-        logger.logInfo(
-                "@" +
-                update.message().from().username() +
-                " sent message: \"" +
-                update.message().text() +
-                "\""
-        );
-
+        logger.logInfo(String.format(
+                "\"%s\" sent message: \"%s\"",
+                update.message().from().username(),
+                update.message().text()
+        ));
         command
                 .setByUpdate(update)
                 .getCommand(update

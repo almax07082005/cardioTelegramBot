@@ -152,10 +152,13 @@ public class Button {
                     .messageIds(messageIds)
                     .build()
             );
-            logger.logInfo(String.format("Review for user @%s was added to database.", username));
+            logger.logInfo(String.format("Review for user \"%s\" was added to database.", username));
 
         } catch (ReviewExistException exception) {
-            logger.logError(exception.getMessage() + " (unpredictable behavior)");
+            logger.logError(String.format(
+                    "%s (unpredictable behavior)",
+                    exception.getMessage()
+            ));
         }
     }
 
@@ -171,7 +174,7 @@ public class Button {
             }
 
             reviewService.deleteReview(username);
-            logger.logInfo(String.format("Review for user @%s was deleted from database.", username));
+            logger.logInfo(String.format("Review for user \"%s\" was deleted from database.", username));
 
         } catch (NoSuchReviewException ignored) {}
     }

@@ -14,6 +14,11 @@ spring:
       ddl-auto: "update"
 
 telegram:
+  logger:
+    id: "-1002118949277"
+    info: "62"
+    warn: "64"
+    error: "66"
   creator:
     username: "@baymukanov"
   channel:

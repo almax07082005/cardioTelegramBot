@@ -6,12 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
 import java.time.LocalDateTime;
 
 @Configuration
-@PropertySource("classpath:hidden.properties")
 public class LogConfig {
 
     private enum LogType {
@@ -20,43 +18,43 @@ public class LogConfig {
         INFO
     }
 
-    @Value("${telegram.bot.admin}")
+    @Value("${telegram.logger.id}")
     private Long chatId;
 
-    private final TelegramBot bot;
-    private final TelegramBot urgentBot;
+    @Value("${telegram.logger.info}")
+    private Integer infoId;
+
+    @Value("${telegram.logger.warn}")
+    private Integer warnId;
+
+    @Value("${telegram.logger.error}")
+    private Integer errorId;
+
+    private final TelegramBot loggerBot;
 
     @Autowired
-    public LogConfig(@Qualifier("loggerBotBean") TelegramBot bot, @Qualifier("urgentBotBean") TelegramBot urgentBot) {
-        this.bot = bot;
-        this.urgentBot = urgentBot;
+    public LogConfig(@Qualifier("loggerBotBean") TelegramBot loggerBot) {
+        this.loggerBot = loggerBot;
     }
 
-    private void sendMessage(LogType logType, String message) {
+    private void sendMessage(LogType logType, String message, Integer messageThreadId) {
         String finalMessage = String.format("%s %s : %s", LocalDateTime.now(), logType, message);
 
-        if (logType == LogType.ERROR) {
-            urgentBot.execute(new SendMessage(
-                    chatId,
-                    finalMessage
-            ));
-        } else {
-            bot.execute(new SendMessage(
-                    chatId,
-                    finalMessage
-            ));
-        }
+        loggerBot.execute(new SendMessage(
+                chatId,
+                finalMessage
+        ).messageThreadId(messageThreadId));
     }
 
     public void error(String message) {
-        sendMessage(LogType.ERROR, message);
+        sendMessage(LogType.ERROR, message, errorId);
     }
 
     public void warn(String message) {
-        sendMessage(LogType.WARN, message);
+        sendMessage(LogType.WARN, message, warnId);
     }
 
     public void info(String message) {
-        sendMessage(LogType.INFO, message);
+        sendMessage(LogType.INFO, message, infoId);
     }
 }

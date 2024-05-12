@@ -16,9 +16,6 @@ public class BotConfig {
     @Value("${telegram.logger-bot.token}")
     private String tokenLogger;
 
-    @Value("${telegram.urgent-bot.token}")
-    private String tokenUrgent;
-
     @Bean("mainBotBean")
     public TelegramBot newTelegramBot() {
         return new TelegramBot(token);
@@ -27,10 +24,5 @@ public class BotConfig {
     @Bean("loggerBotBean")
     public TelegramBot newTelegramBotLogger() {
         return new TelegramBot(tokenLogger);
-    }
-
-    @Bean("urgentBotBean")
-    public TelegramBot newTelegramBotUrgent() {
-        return new TelegramBot(tokenUrgent);
     }
 }

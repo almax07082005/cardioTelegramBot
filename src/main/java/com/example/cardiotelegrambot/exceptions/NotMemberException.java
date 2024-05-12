@@ -11,6 +11,10 @@ public class NotMemberException extends BaseException {
 
     @Override
     public String getMessage() {
-        return (username.equals("Current user") ? "" : "@") + username + " is not a member";
+        username = "\"" + username + "\"";
+        return String.format(
+                "%s is not a member",
+                username
+        );
     }
 }

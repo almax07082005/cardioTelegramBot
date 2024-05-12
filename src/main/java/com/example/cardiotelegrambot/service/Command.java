@@ -50,7 +50,11 @@ public class Command {
             commandKey = Commands.fromString(command);
             return mapCommands.get(commandKey);
         } catch (NotCommandException exception) {
-            logger.logWarn("@" + username + ": " + exception.getMessage());
+            logger.logWarn(String.format(
+                    "\"%s\": %s",
+                    username,
+                    exception.getMessage()
+            ));
             return this::notACommand;
         }
     }
@@ -124,14 +128,17 @@ public class Command {
                     user.getMessageId()
             ));
             userService.updateUser(newUser);
-            logger.logInfo(String.format("User @%s was updated in database.", username));
+            logger.logInfo(String.format("User \"%s\" was updated in database.", username));
 
         } catch (NoSuchUserException exception) {
             try {
                 userService.createUser(newUser);
-                logger.logInfo(String.format("User @%s was added to database.", username));
+                logger.logInfo(String.format("User \"%s\" was added to database.", username));
             } catch (UserExistException nestedException) {
-                logger.logError(nestedException.getMessage() + " (unpredictable behavior)");
+                logger.logError(String.format(
+                        "%s (unpredictable behavior)",
+                        nestedException.getMessage()
+                ));
             }
         }
     }
