@@ -9,8 +9,13 @@ services:
       - 'POSTGRES_USER=admin'
     ports:
       - '5432:5432'
+    volumes:
+      - 'cardio-db-volume:/var/lib/postgresql/data'
 
   cardio-bot:
     image: 'cardio-bot:latest'
     depends_on:
       - cardio-db
+
+volumes:
+  cardio-db-volume:
