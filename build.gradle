@@ -35,6 +35,12 @@ bootJar {
 	archiveFileName = "cardioBot.jar"
 }
 
+tasks.register("buildDeployDockerImage", Exec) {
+	group "docker"
+	dependsOn bootJar
+	commandLine "docker", "build", "--platform", "linux/amd64", "-t", "almaxgood/cardio-bot", "."
+}
+
 tasks.register("buildDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJar
