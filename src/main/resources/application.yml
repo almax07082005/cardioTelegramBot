@@ -5,8 +5,6 @@ spring:
     location: "src/main/resources"
   datasource:
     url: "jdbc:postgresql://cardio-db:5432/cardio-db"
-    username: "admin"
-    password: "secret"
     driver-class-name: "org.postgresql.Driver"
   jpa:
     database: "postgresql"

@@ -2,6 +2,13 @@
 
 This telegram bot intends to promote information about cardiology.
 
+To build the server proceed with the following steps:
+
+1. Clone this repo to your local machine with the command: ```git clone https://github.com/almax07082005/cardioTelegramBot.git```.
+2. Add ```hidden.properties``` file to ```resources``` folder with necessary content and ```spring.datasource``` variables in order to set up database credentials.
+3. Add ```.env``` file to root folder with ```POSTGRES_USER``` and ```POSTGRES_PASSWORD``` variables for ```compose.yaml``` file.
+4. Start your application with ```startDockerImage``` gradle custom task.
+
 ## Change the bot
 
 1. Create new bot through BotFather.
