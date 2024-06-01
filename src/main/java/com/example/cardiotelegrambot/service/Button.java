@@ -118,7 +118,12 @@ public class Button {
     }
 
     private void inviteFriend() {
-        EditMessageText message = new EditMessageText(chatId, messageId, "Извините, но пока эта функция в работе.");
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                А вот и Ваша реферальная ссылка:
+                https://t.me/cardiozametki_bot?start=%s
+                """,
+                chatId
+        ));
 
         message.replyMarkup(new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())

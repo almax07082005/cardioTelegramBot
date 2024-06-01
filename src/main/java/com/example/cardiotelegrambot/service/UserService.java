@@ -28,9 +28,19 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserEntity getUser(String username) throws NoSuchUserException {
+    public UserEntity getByUsername(String username) throws NoSuchUserException {
 
         Optional<UserEntity> user = userRepository.getByUsername(username);
+        if (user.isEmpty()) {
+            throw new NoSuchUserException();
+        }
+
+        return user.get();
+    }
+
+    public UserEntity getByChatId(Long chatId) throws NoSuchUserException {
+
+        Optional<UserEntity> user = userRepository.getByChatId(chatId);
         if (user.isEmpty()) {
             throw new NoSuchUserException();
         }

@@ -16,10 +16,12 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class Command {
@@ -32,6 +34,7 @@ public class Command {
     private Integer messageId;
     private String firstName;
     private String username;
+    private String referralLink;
     private final Map<Commands, Runnable> mapCommands;
 
     @Autowired
@@ -45,10 +48,11 @@ public class Command {
     }
 
     public Runnable getCommand(String command) {
-        Commands commandKey;
         try {
-            commandKey = Commands.fromString(command);
-            return mapCommands.get(commandKey);
+            Pair<Commands, String> pair = Commands.fromString(command);
+            referralLink = pair.getSecond();
+            return mapCommands.get(pair.getFirst());
+
         } catch (NotCommandException exception) {
             logger.logWarn(String.format(
                     "\"%s\": %s",
@@ -103,7 +107,35 @@ public class Command {
         return inlineKeyboardMarkup;
     }
 
+    private void updateLinkSender() {
+
+        if (referralLink.isBlank()) {
+            return;
+        }
+
+        try {
+            UserEntity user = userService.getByChatId(Long.valueOf(referralLink));
+
+            Set<Long> usersChatIds = user.getUsersChatIds();
+            usersChatIds.add(chatId);
+            user.setUsersChatIds(usersChatIds);
+
+            userService.updateUser(user);
+            logger.logInfo(String.format(
+                    "To user \"%s\" referral link was added in database.",
+                    user.getUsername()
+            ));
+
+        } catch (NumberFormatException | NoSuchUserException exception) {
+            logger.logWarn(String.format(
+                    "User \"%s\" has an invalid referral link.",
+                    username
+            ));
+        }
+    }
+
     private void start() {
+        updateLinkSender();
 
         SendMessage message = new SendMessage(chatId, String.format("""
                 Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.%n
@@ -122,18 +154,24 @@ public class Command {
                 .build();
 
         try {
-            UserEntity user = userService.getUser(username);
+            UserEntity user = userService.getByUsername(username);
             bot.execute(new DeleteMessage(
                     user.getChatId(),
                     user.getMessageId()
             ));
             userService.updateUser(newUser);
-            logger.logInfo(String.format("User \"%s\" was updated in database.", username));
+            logger.logInfo(String.format(
+                    "User \"%s\" was updated in database.",
+                    username
+            ));
 
         } catch (NoSuchUserException exception) {
             try {
                 userService.createUser(newUser);
-                logger.logInfo(String.format("User \"%s\" was added to database.", username));
+                logger.logInfo(String.format(
+                        "User \"%s\" was added to database.",
+                        username
+                ));
             } catch (UserExistException nestedException) {
                 logger.logError(String.format(
                         "%s (unpredictable behavior)",
