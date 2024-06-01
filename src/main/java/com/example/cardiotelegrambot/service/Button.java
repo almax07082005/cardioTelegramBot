@@ -152,7 +152,10 @@ public class Button {
                     .messageIds(messageIds)
                     .build()
             );
-            logger.logInfo(String.format("Review for user \"%s\" was added to database.", username));
+            logger.logInfo(String.format(
+                    "Review for user \"%s\" was added to database.",
+                    username
+            ));
 
         } catch (ReviewExistException exception) {
             logger.logError(String.format(
@@ -174,7 +177,10 @@ public class Button {
             }
 
             reviewService.deleteReview(username);
-            logger.logInfo(String.format("Review for user \"%s\" was deleted from database.", username));
+            logger.logInfo(String.format(
+                    "Review for user \"%s\" was deleted from database.",
+                    username
+            ));
 
         } catch (NoSuchReviewException ignored) {}
     }
@@ -299,7 +305,11 @@ public class Button {
                     .chatMember()
                     .status();
 
-            if (!(status == ChatMember.Status.creator || status == ChatMember.Status.administrator || status == ChatMember.Status.member)) {
+            if (!(
+                    status == ChatMember.Status.creator ||
+                    status == ChatMember.Status.administrator ||
+                    status == ChatMember.Status.member
+            )) {
                 throw new NotMemberException(username);
             }
 

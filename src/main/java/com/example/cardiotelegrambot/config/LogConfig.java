@@ -38,7 +38,12 @@ public class LogConfig {
     }
 
     private void sendMessage(LogType logType, String message, Integer messageThreadId) {
-        String finalMessage = String.format("%s %s : %s", LocalDateTime.now(), logType, message);
+        String finalMessage = String.format(
+                "%s %s : %s",
+                LocalDateTime.now(),
+                logType,
+                message
+        );
 
         loggerBot.execute(new SendMessage(
                 chatId,
