@@ -173,7 +173,7 @@ public class Button {
 
     private void deleteReview() {
         try {
-            ReviewEntity review = reviewService.getReview(username);
+            ReviewEntity review = reviewService.getReview(chatId);
 
             for (Integer messageId : review.getMessageIds()) {
                 bot.execute(new DeleteMessage(
@@ -182,7 +182,7 @@ public class Button {
                 ));
             }
 
-            reviewService.deleteReview(username);
+            reviewService.deleteReview(chatId);
             logger.logInfo(String.format(
                     "Review for user \"%s\"_%s was deleted from database.",
                     username,

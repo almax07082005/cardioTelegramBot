@@ -22,8 +22,8 @@ import java.util.List;
 public class ReviewEntity {
 
     @Id
-    private String username;
     private Long chatId;
+    private String username;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Integer> messageIds = new ArrayList<>();

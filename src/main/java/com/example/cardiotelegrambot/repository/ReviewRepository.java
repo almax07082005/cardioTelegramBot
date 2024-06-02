@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<ReviewEntity, UUID> {
-    Optional<ReviewEntity> getByUsername(String username);
+    Optional<ReviewEntity> getByChatId(Long chatId);
 }
