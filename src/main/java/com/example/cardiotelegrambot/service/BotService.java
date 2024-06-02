@@ -48,7 +48,7 @@ public class BotService {
 
     private void executeButton(Update update) {
         logger.logInfo(String.format(
-                "\"%s\"_%s pressed button: \"%s\"",
+                "\"%s\"_%s pressed button: \"%s\".",
                 update.callbackQuery().from().username(),
                 update.callbackQuery().from().id(),
                 update.callbackQuery().data()
@@ -63,7 +63,7 @@ public class BotService {
 
     private void executeCommand(Update update) {
         logger.logInfo(String.format(
-                "\"%s\"_%s sent message: \"%s\"",
+                "\"%s\"_%s sent message: \"%s\".",
                 update.message().from().username(),
                 update.message().chat().id(),
                 update.message().text()

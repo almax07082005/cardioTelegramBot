@@ -4,8 +4,10 @@ import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.config.enums.Buttons;
 import com.example.cardiotelegrambot.config.enums.Commands;
 import com.example.cardiotelegrambot.entity.UserEntity;
+import com.example.cardiotelegrambot.exceptions.AlreadyReferralException;
 import com.example.cardiotelegrambot.exceptions.NoSuchUserException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
+import com.example.cardiotelegrambot.exceptions.SelfReferralException;
 import com.example.cardiotelegrambot.exceptions.UserExistException;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -108,14 +110,31 @@ public class Command {
         return inlineKeyboardMarkup;
     }
 
-    private void updateLinkSender() {
+    private boolean updateLinkSender() {
+
+        boolean isReferral;
+        try {
+            isReferral = userService.getByChatId(chatId).getIsReferral();
+        } catch (NoSuchUserException exception) {
+            isReferral = false;
+        }
+
         if (referralLink.isBlank()) {
-            return;
+            return isReferral;
         }
         try {
-            UserEntity user = userService.getByChatId(Long.valueOf(referralLink));
+            if (isReferral) {
+                throw new AlreadyReferralException(username, chatId);
+            }
 
+            Long longReferralLink = Long.valueOf(referralLink);
+            if (longReferralLink.equals(chatId)) {
+                throw new SelfReferralException(username, chatId);
+            }
+
+            UserEntity user = userService.getByChatId(longReferralLink);
             Set<Long> usersChatIds = user.getUsersChatIds();
+
             usersChatIds.add(chatId);
             user.setUsersChatIds(usersChatIds);
 
@@ -125,6 +144,7 @@ public class Command {
                     user.getUsername(),
                     user.getChatId()
             ));
+            return true;
 
         } catch (NumberFormatException | NoSuchUserException exception) {
             logger.logWarn(String.format(
@@ -132,10 +152,16 @@ public class Command {
                     username,
                     chatId
             ));
+            return isReferral;
+
+        } catch (SelfReferralException | AlreadyReferralException exception) {
+            logger.logWarn(exception.getMessage());
+            return isReferral;
         }
     }
 
     private void start() {
+        boolean isReferral = updateLinkSender();
         SendMessage message = new SendMessage(chatId, String.format("""
                 Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.%n
                 Выберите интересующий вас пункт меню.
@@ -146,19 +172,21 @@ public class Command {
         SendResponse response = bot.execute(message);
         notACommand();
 
-        UserEntity newUser = UserEntity.builder()
+        UserEntity.UserEntityBuilder newUser = UserEntity.builder()
                 .username(username)
                 .chatId(response.message().chat().id())
                 .messageId(response.message().messageId())
-                .build();
-
+                .isReferral(isReferral);
         try {
             UserEntity user = userService.getByChatId(chatId);
             bot.execute(new DeleteMessage(
                     user.getChatId(),
                     user.getMessageId()
             ));
-            userService.updateUser(newUser);
+            userService.updateUser(newUser
+                    .usersChatIds(user.getUsersChatIds())
+                    .build()
+            );
             logger.logInfo(String.format(
                     "User \"%s\"_%s was updated in database.",
                     username,
@@ -167,7 +195,7 @@ public class Command {
 
         } catch (NoSuchUserException exception) {
             try {
-                userService.createUser(newUser);
+                userService.createUser(newUser.build());
                 logger.logInfo(String.format(
                         "User \"%s\"_%s was added to database.",
                         username,
@@ -180,7 +208,6 @@ public class Command {
                 ));
             }
         }
-        updateLinkSender();
     }
 
     private void notACommand() {

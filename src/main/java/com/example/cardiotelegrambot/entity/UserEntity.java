@@ -25,6 +25,7 @@ public class UserEntity {
     private Long chatId;
     private String username;
     private Integer messageId;
+    private Boolean isReferral;
 
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Long> usersChatIds = new HashSet<>();
