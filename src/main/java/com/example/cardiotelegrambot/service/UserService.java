@@ -21,21 +21,11 @@ public class UserService {
 
     public void createUser(UserEntity user) throws UserExistException {
 
-        if (userRepository.getByUsername(user.getUsername()).isPresent()) {
+        if (userRepository.getByChatId(user.getChatId()).isPresent()) {
             throw new UserExistException();
         }
 
         userRepository.save(user);
-    }
-
-    public UserEntity getByUsername(String username) throws NoSuchUserException {
-
-        Optional<UserEntity> user = userRepository.getByUsername(username);
-        if (user.isEmpty()) {
-            throw new NoSuchUserException();
-        }
-
-        return user.get();
     }
 
     public UserEntity getByChatId(Long chatId) throws NoSuchUserException {
@@ -50,7 +40,7 @@ public class UserService {
 
     public void updateUser(UserEntity user) throws NoSuchUserException {
 
-        if (userRepository.getByUsername(user.getUsername()).isEmpty()) {
+        if (userRepository.getByChatId(user.getChatId()).isEmpty()) {
             throw new NoSuchUserException();
         }
 

@@ -22,8 +22,8 @@ import java.util.Set;
 public class UserEntity {
 
     @Id
-    private String username;
     private Long chatId;
+    private String username;
     private Integer messageId;
 
     @ElementCollection(fetch = FetchType.EAGER)

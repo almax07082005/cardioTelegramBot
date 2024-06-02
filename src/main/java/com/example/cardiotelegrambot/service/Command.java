@@ -55,8 +55,9 @@ public class Command {
 
         } catch (NotCommandException exception) {
             logger.logWarn(String.format(
-                    "\"%s\": %s",
+                    "\"%s\"_%s: %s",
                     username,
+                    chatId,
                     exception.getMessage()
             ));
             return this::notACommand;
@@ -108,11 +109,9 @@ public class Command {
     }
 
     private void updateLinkSender() {
-
         if (referralLink.isBlank()) {
             return;
         }
-
         try {
             UserEntity user = userService.getByChatId(Long.valueOf(referralLink));
 
@@ -122,21 +121,21 @@ public class Command {
 
             userService.updateUser(user);
             logger.logInfo(String.format(
-                    "To user \"%s\" referral link was added in database.",
-                    user.getUsername()
+                    "To user \"%s\"_%s referral link was added in database.",
+                    user.getUsername(),
+                    user.getChatId()
             ));
 
         } catch (NumberFormatException | NoSuchUserException exception) {
             logger.logWarn(String.format(
-                    "User \"%s\" has an invalid referral link.",
-                    username
+                    "User \"%s\"_%s has an invalid referral link.",
+                    username,
+                    chatId
             ));
         }
     }
 
     private void start() {
-        updateLinkSender();
-
         SendMessage message = new SendMessage(chatId, String.format("""
                 Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.%n
                 Выберите интересующий вас пункт меню.
@@ -154,23 +153,25 @@ public class Command {
                 .build();
 
         try {
-            UserEntity user = userService.getByUsername(username);
+            UserEntity user = userService.getByChatId(chatId);
             bot.execute(new DeleteMessage(
                     user.getChatId(),
                     user.getMessageId()
             ));
             userService.updateUser(newUser);
             logger.logInfo(String.format(
-                    "User \"%s\" was updated in database.",
-                    username
+                    "User \"%s\"_%s was updated in database.",
+                    username,
+                    chatId
             ));
 
         } catch (NoSuchUserException exception) {
             try {
                 userService.createUser(newUser);
                 logger.logInfo(String.format(
-                        "User \"%s\" was added to database.",
-                        username
+                        "User \"%s\"_%s was added to database.",
+                        username,
+                        chatId
                 ));
             } catch (UserExistException nestedException) {
                 logger.logError(String.format(
@@ -179,6 +180,7 @@ public class Command {
                 ));
             }
         }
+        updateLinkSender();
     }
 
     private void notACommand() {
