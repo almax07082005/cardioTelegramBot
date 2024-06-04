@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.service;
+package com.example.cardiotelegrambot.service.bot.main;
 
 import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.config.enums.Buttons;
@@ -9,6 +9,7 @@ import com.example.cardiotelegrambot.exceptions.NoSuchUserException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
 import com.example.cardiotelegrambot.exceptions.SelfReferralException;
 import com.example.cardiotelegrambot.exceptions.UserExistException;
+import com.example.cardiotelegrambot.service.database.UserService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;

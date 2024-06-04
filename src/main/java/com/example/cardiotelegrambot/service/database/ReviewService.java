@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.service;
+package com.example.cardiotelegrambot.service.database;
 
 import com.example.cardiotelegrambot.entity.ReviewEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
