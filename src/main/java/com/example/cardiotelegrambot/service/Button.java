@@ -139,7 +139,7 @@ public class Button {
 
             return is.readAllBytes();
         } catch (IOException exception) {
-            logger.logError(exception);
+            logger.logException(exception);
             return null;
         }
     }

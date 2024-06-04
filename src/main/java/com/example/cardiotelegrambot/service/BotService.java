@@ -33,7 +33,7 @@ public class BotService {
                     else executeCommand(update);
                 }
             } catch (Exception exception) {
-                logger.logError(exception);
+                logger.logException(exception);
             }
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         }, exception -> {
@@ -41,7 +41,7 @@ public class BotService {
                 exception.response().errorCode();
                 exception.response().description();
             } else {
-                logger.logError(exception);
+                logger.logException(exception);
             }
         });
     }

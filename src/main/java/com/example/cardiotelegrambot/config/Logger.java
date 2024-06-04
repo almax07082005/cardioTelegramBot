@@ -15,7 +15,7 @@ public class Logger {
         this.log = log;
     }
 
-    public void logError(Exception exception) {
+    public void logException(Exception exception) {
         log.error(exception.getMessage() +
                 "\n" +
                 String.join("\n", Arrays

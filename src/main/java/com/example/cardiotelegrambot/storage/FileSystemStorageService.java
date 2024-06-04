@@ -27,7 +27,7 @@ public class FileSystemStorageService implements StorageService {
         try {
             Files.createDirectories(rootLocation);
         } catch (IOException exception) {
-            logger.logError(exception);
+            logger.logException(exception);
         }
     }
 
@@ -37,7 +37,7 @@ public class FileSystemStorageService implements StorageService {
             Path destinationFile = this.rootLocation.resolve(filename).normalize().toAbsolutePath();
             Files.write(destinationFile, content.getBytes());
         } catch (IOException exception) {
-            logger.logError(exception);
+            logger.logException(exception);
         }
     }
 
