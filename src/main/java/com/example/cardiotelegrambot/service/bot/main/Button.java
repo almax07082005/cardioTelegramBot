@@ -118,6 +118,13 @@ public class Button {
         return this;
     }
 
+    public Button setByVariables(Long chatId) {
+        this.username = null;
+        this.chatId = chatId;
+
+        return this;
+    }
+
     private void inviteFriend() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
                 А вот и Ваша реферальная ссылка:
@@ -307,19 +314,23 @@ public class Button {
         bot.execute(message);
     }
 
+    public void isSubscribed() throws NotMemberException {
+        ChatMember.Status status = bot.execute(new GetChatMember(channelId, chatId))
+                .chatMember()
+                .status();
+
+        if (!(
+                status == ChatMember.Status.creator ||
+                status == ChatMember.Status.administrator ||
+                status == ChatMember.Status.member
+        )) {
+            throw new NotMemberException(username, chatId);
+        }
+    }
+
     private void getGuide() {
         try {
-            ChatMember.Status status = bot.execute(new GetChatMember(channelId, chatId))
-                    .chatMember()
-                    .status();
-
-            if (!(
-                    status == ChatMember.Status.creator ||
-                    status == ChatMember.Status.administrator ||
-                    status == ChatMember.Status.member
-            )) {
-                throw new NotMemberException(username, chatId);
-            }
+            isSubscribed();
 
             EditMessageText message = new EditMessageText(
                     chatId,

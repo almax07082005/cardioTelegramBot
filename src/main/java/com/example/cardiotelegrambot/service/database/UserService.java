@@ -3,8 +3,11 @@ package com.example.cardiotelegrambot.service.database;
 import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.entity.UserEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchUserException;
+import com.example.cardiotelegrambot.exceptions.NotMemberException;
 import com.example.cardiotelegrambot.exceptions.UserExistException;
 import com.example.cardiotelegrambot.repository.UserRepository;
+import com.example.cardiotelegrambot.service.bot.main.Button;
+import lombok.Builder;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +25,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final Logger logger;
+    private final Button button;
 
     @Value("${spring.data.table}")
     private String tableFilename;
 
     @Autowired
-    public UserService(UserRepository userRepository, Logger logger) {
+    public UserService(UserRepository userRepository, Logger logger, Button button) {
         this.userRepository = userRepository;
         this.logger = logger;
+        this.button = button;
     }
 
     public void createUser(UserEntity user) throws UserExistException {
@@ -59,8 +65,49 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Builder(toBuilder = true)
+    private static class UserDTO {
+        private Long chatId;
+        private String username;
+        private Integer usersAmount;
+    }
+
+    private List<UserDTO> getAllFiltered() {
+        List<UserEntity> allUsers = userRepository.findAll();
+        List<UserDTO> filteredUsers = new ArrayList<>();
+
+        for (UserEntity user : allUsers) {
+            int usersAmount = 0;
+
+            for (Long chatId : user.getUsersChatIds()) {
+                boolean isSubscribed;
+                try {
+                    button
+                            .setByVariables(chatId)
+                            .isSubscribed();
+                    isSubscribed = true;
+                } catch (NotMemberException exception) {
+                    isSubscribed = false;
+                }
+
+                if (isSubscribed) {
+                    usersAmount++;
+                }
+            }
+
+            filteredUsers.add(UserDTO.builder()
+                    .chatId(user.getChatId())
+                    .username(user.getUsername())
+                    .usersAmount(usersAmount)
+                    .build()
+            );
+        }
+
+        return filteredUsers;
+    }
+
     public void storeUsersToCSV() {
-        List<UserEntity> users = userRepository.findAll();
+        List<UserDTO> users = getAllFiltered();
 
         try {
             FileWriter out = new FileWriter(tableFilename);
@@ -68,8 +115,8 @@ public class UserService {
                     .setHeader("chatId", "username", "usersAmount")
                     .build();
             try (CSVPrinter printer = new CSVPrinter(out, csvFormat)) {
-                for (UserEntity user : users) {
-                    printer.printRecord(user.getChatId(), user.getUsername(), user.getUsersChatIds().size());
+                for (UserDTO user : users) {
+                    printer.printRecord(user.chatId, user.username, user.usersAmount);
                 }
             }
         } catch (IOException exception) {

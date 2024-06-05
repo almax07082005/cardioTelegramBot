@@ -80,7 +80,7 @@ public class LoggerCommand {
                     chatId,
                     "Реферальная программа остановлена успешно."
             ));
-        } catch (IOException exception) {
+        } catch (IOException ignored) {
             bot.execute(new SendMessage(
                     chatId,
                     "Фиг его знает, че-то не сработало, надо разбираться."
@@ -95,7 +95,7 @@ public class LoggerCommand {
                     chatId,
                     "Реферальная программа запущена успешно."
             ));
-        } catch (IOException exception) {
+        } catch (IOException ignored) {
             bot.execute(new SendMessage(
                     chatId,
                     "Фиг его знает, че-то не сработало, надо разбираться."

@@ -132,7 +132,7 @@ public class Command {
 
         try (FileReader fileReader = new FileReader(referralFilename)) {
             isProgramStarted = Boolean.parseBoolean(readFromReferral(fileReader));
-        } catch (IOException exception) {
+        } catch (IOException ignored) {
             isProgramStarted = false;
         }
 
@@ -145,7 +145,7 @@ public class Command {
         boolean isReferral;
         try {
             isReferral = userService.getByChatId(chatId).getIsReferral();
-        } catch (NoSuchUserException exception) {
+        } catch (NoSuchUserException ignored) {
             isReferral = false;
         }
 
@@ -185,7 +185,7 @@ public class Command {
             ));
             return Pair.of("Вы успешно зарегистрировались в реферальной программе!", true);
 
-        } catch (NumberFormatException | NoSuchUserException exception) {
+        } catch (NumberFormatException | NoSuchUserException ignored) {
             logger.logWarn(String.format(
                     "User \"%s\"_%s has an invalid referral link.",
                     username,
@@ -237,7 +237,7 @@ public class Command {
                     chatId
             ));
 
-        } catch (NoSuchUserException exception) {
+        } catch (NoSuchUserException ignored) {
             try {
                 userService.createUser(newUser.build());
                 logger.logInfo(String.format(
