@@ -59,7 +59,7 @@ public class UserService {
         List<UserEntity> users = userRepository.findAll();
 
         try {
-            FileWriter out = new FileWriter("users.csv");
+            FileWriter out = new FileWriter("winners.csv");
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader("chatId", "username", "usersAmount")
                     .build();

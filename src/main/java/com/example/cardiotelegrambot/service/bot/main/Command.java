@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -111,7 +113,24 @@ public class Command {
         return inlineKeyboardMarkup;
     }
 
+    private String read(FileReader reader) throws IOException {
+        char[] buffer = new char[5];
+        int charactersRead = reader.read(buffer, 0, 5);
+        if (charactersRead != -1) {
+            return new String(buffer, 0, charactersRead);
+        } else {
+            return "";
+        }
+    }
+
     private boolean updateLinkSender() {
+
+        boolean isProgramStarted;
+        try (FileReader fileReader = new FileReader("referral.txt")) {
+            isProgramStarted = Boolean.parseBoolean(read(fileReader));
+        } catch (IOException exception) {
+            isProgramStarted = false;
+        }
 
         boolean isReferral;
         try {
@@ -120,7 +139,7 @@ public class Command {
             isReferral = false;
         }
 
-        if (referralLink.isBlank()) {
+        if (referralLink.isBlank() || !isProgramStarted) {
             return isReferral;
         }
         try {

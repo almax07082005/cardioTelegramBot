@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,13 +38,14 @@ public class LoggerCommand {
 
         mapCommands = new HashMap<>();
         mapCommands.put(LoggerCommands.start, this::start);
+        mapCommands.put(LoggerCommands.startReferral, this::startReferral);
+        mapCommands.put(LoggerCommands.finishReferral, this::finishReferral);
         mapCommands.put(LoggerCommands.getWinners, this::getWinners);
     }
 
     public Runnable getCommand(String command) {
         try {
             return mapCommands.get(LoggerCommands.fromString(command));
-
         } catch (NotCommandException exception) {
             return this::notACommand;
         }
@@ -61,6 +64,28 @@ public class LoggerCommand {
         return this;
     }
 
+    private void finishReferral() {
+        try (FileWriter fileWriter = new FileWriter("referral.txt")) {
+            fileWriter.write("false");
+        } catch (IOException exception) {
+            bot.execute(new SendMessage(
+                    chatId,
+                    "Фиг его знает, че-то не сработало, надо разбираться."
+            ));
+        }
+    }
+
+    private void startReferral() {
+        try (FileWriter fileWriter = new FileWriter("referral.txt")) {
+            fileWriter.write("true");
+        } catch (IOException exception) {
+            bot.execute(new SendMessage(
+                    chatId,
+                    "Фиг его знает, че-то не сработало, надо разбираться."
+            ));
+        }
+    }
+
     private void start() {
         bot.execute(new SendMessage(
                 chatId,
@@ -68,6 +93,8 @@ public class LoggerCommand {
                         Привет, братанчик Азамат (а может и не только ты)! Тебе пишет твой верный слуга, бот для админов (в этом канале я заправляю, как ты уже понял), и вот, что ты можешь у меня спросить (просто нажми на нужную команду):
                         
                         /start - получить это сообщение;
+                        /startReferral - начать реферальную программу;
+                        /finishReferral - завершить реферальную программу;
                         /getWinners - получить список победителей*.
                         
                         *Не бойся csv файла, просто открой его, он должен открыться как таблица через приложение Numbers на MacOS или Excel на Windows.
@@ -79,14 +106,14 @@ public class LoggerCommand {
         userService.storeUsersToCSV();
         bot.execute(new SendDocument(
                 chatId,
-                new File("users.csv")
+                new File("winners.csv")
         ));
     }
 
     private void notACommand() {
         bot.execute(new SendMessage(
                 chatId,
-                "Вы ввели неправильную команду. Попробуйте выбрать другую из меню команд."
+                "Братан, ты какую-то херню написал. Выбери команду из списка. Список можно найти, нажав (или написав) '/start.'"
         ));
     }
 }

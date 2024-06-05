@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 public enum LoggerCommands {
 
     start("/start"),
+    startReferral("/startReferral"),
+    finishReferral("/finishReferral"),
     getWinners("/getWinners");
 
     private final String name;
