@@ -19,6 +19,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,9 @@ public class Command {
     private String username;
     private String referralLink;
     private final Map<Commands, Runnable> mapCommands;
+
+    @Value("${spring.data.referral}")
+    private String referralFilename;
 
     @Autowired
     public Command(@Qualifier("mainBotBean") TelegramBot bot, UserService userService, Logger logger) {
@@ -113,7 +117,7 @@ public class Command {
         return inlineKeyboardMarkup;
     }
 
-    private String read(FileReader reader) throws IOException {
+    private String readFromReferral(FileReader reader) throws IOException {
         char[] buffer = new char[5];
         int charactersRead = reader.read(buffer, 0, 5);
         if (charactersRead != -1) {
@@ -123,11 +127,11 @@ public class Command {
         }
     }
 
-    private boolean updateLinkSender() {
+    private Pair<String, Boolean> updateLinkSender() {
 
         boolean isProgramStarted;
-        try (FileReader fileReader = new FileReader("referral.txt")) {
-            isProgramStarted = Boolean.parseBoolean(read(fileReader));
+        try (FileReader fileReader = new FileReader(referralFilename)) {
+            isProgramStarted = Boolean.parseBoolean(readFromReferral(fileReader));
         } catch (IOException exception) {
             isProgramStarted = false;
         }
@@ -139,9 +143,13 @@ public class Command {
             isReferral = false;
         }
 
-        if (referralLink.isBlank() || !isProgramStarted) {
-            return isReferral;
+        if (referralLink.isBlank()) {
+            return Pair.of("", isReferral);
         }
+        if (!isProgramStarted) {
+            return Pair.of("Извините, сейчас реферальная программа не активна.", isReferral);
+        }
+
         try {
             if (isReferral) {
                 throw new AlreadyReferralException(username, chatId);
@@ -164,7 +172,7 @@ public class Command {
                     user.getUsername(),
                     user.getChatId()
             ));
-            return true;
+            return Pair.of("Вы успешно зарегистрировались в реферальной программе!", true);
 
         } catch (NumberFormatException | NoSuchUserException exception) {
             logger.logWarn(String.format(
@@ -172,20 +180,25 @@ public class Command {
                     username,
                     chatId
             ));
-            return isReferral;
+            return Pair.of("Извините, у Вас некорректная реферальная ссылка.", isReferral);
 
-        } catch (SelfReferralException | AlreadyReferralException exception) {
+        } catch (AlreadyReferralException exception) {
             logger.logWarn(exception.getMessage());
-            return isReferral;
+            return Pair.of("Извините, Вы уже зарегистрировались в реферальной программе.", true);
+
+        } catch (SelfReferralException exception) {
+            logger.logWarn(exception.getMessage());
+            return Pair.of("Кажется, Вы прошли по своей реферальной ссылке.", false);
         }
     }
 
     private void start() {
-        boolean isReferral = updateLinkSender();
+        Pair<String, Boolean> isReferralPair = updateLinkSender();
         SendMessage message = new SendMessage(chatId, String.format("""
-                Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.%n
+                Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.
+                %s%n
                 Выберите интересующий вас пункт меню.
-                """, firstName
+                """, firstName, isReferralPair.getFirst()
         ));
 
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
@@ -196,7 +209,7 @@ public class Command {
                 .username(username)
                 .chatId(response.message().chat().id())
                 .messageId(response.message().messageId())
-                .isReferral(isReferral);
+                .isReferral(isReferralPair.getSecond());
         try {
             UserEntity user = userService.getByChatId(chatId);
             bot.execute(new DeleteMessage(

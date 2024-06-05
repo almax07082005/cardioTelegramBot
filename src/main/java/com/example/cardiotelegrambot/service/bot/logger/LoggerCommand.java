@@ -29,6 +29,12 @@ public class LoggerCommand {
     @Value("${telegram.logger.id}")
     private Long adminChatId;
 
+    @Value("${spring.data.table}")
+    private String tableFilename;
+
+    @Value("${spring.data.referral}")
+    private String referralFilename;
+
     private final Map<LoggerCommands, Runnable> mapCommands;
 
     @Autowired
@@ -65,8 +71,12 @@ public class LoggerCommand {
     }
 
     private void finishReferral() {
-        try (FileWriter fileWriter = new FileWriter("referral.txt")) {
+        try (FileWriter fileWriter = new FileWriter(referralFilename)) {
             fileWriter.write("false");
+            bot.execute(new SendMessage(
+                    chatId,
+                    "Реферальная программа остановлена успешно."
+            ));
         } catch (IOException exception) {
             bot.execute(new SendMessage(
                     chatId,
@@ -76,8 +86,12 @@ public class LoggerCommand {
     }
 
     private void startReferral() {
-        try (FileWriter fileWriter = new FileWriter("referral.txt")) {
+        try (FileWriter fileWriter = new FileWriter(referralFilename)) {
             fileWriter.write("true");
+            bot.execute(new SendMessage(
+                    chatId,
+                    "Реферальная программа запущена успешно."
+            ));
         } catch (IOException exception) {
             bot.execute(new SendMessage(
                     chatId,
@@ -106,7 +120,7 @@ public class LoggerCommand {
         userService.storeUsersToCSV();
         bot.execute(new SendDocument(
                 chatId,
-                new File("winners.csv")
+                new File(tableFilename)
         ));
     }
 

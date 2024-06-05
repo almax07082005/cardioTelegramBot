@@ -8,6 +8,7 @@ import com.example.cardiotelegrambot.repository.UserRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.FileWriter;
@@ -20,6 +21,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final Logger logger;
+
+    @Value("${spring.data.table}")
+    private String tableFilename;
 
     @Autowired
     public UserService(UserRepository userRepository, Logger logger) {
@@ -59,7 +63,7 @@ public class UserService {
         List<UserEntity> users = userRepository.findAll();
 
         try {
-            FileWriter out = new FileWriter("winners.csv");
+            FileWriter out = new FileWriter(tableFilename);
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader("chatId", "username", "usersAmount")
                     .build();
