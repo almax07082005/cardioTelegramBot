@@ -8,13 +8,15 @@ import lombok.NoArgsConstructor;
 public class NotMemberException extends BaseException {
 
     private String username = "Current user";
+    private Long chatId = 0L;
 
     @Override
     public String getMessage() {
         username = "\"" + username + "\"";
         return String.format(
-                "%s is not a member",
-                username
+                "%s_%s is not a member",
+                username,
+                chatId
         );
     }
 }

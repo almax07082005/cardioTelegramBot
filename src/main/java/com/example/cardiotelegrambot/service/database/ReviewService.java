@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.service;
+package com.example.cardiotelegrambot.service.database;
 
 import com.example.cardiotelegrambot.entity.ReviewEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
@@ -21,16 +21,16 @@ public class ReviewService {
 
     public void createReview(ReviewEntity review) throws ReviewExistException {
 
-        if (reviewRepository.getByUsername(review.getUsername()).isPresent()) {
+        if (reviewRepository.getByChatId(review.getChatId()).isPresent()) {
             throw new ReviewExistException();
         }
 
         reviewRepository.save(review);
     }
 
-    public ReviewEntity getReview(String username) throws NoSuchReviewException {
+    public ReviewEntity getReview(Long chatId) throws NoSuchReviewException {
 
-        Optional<ReviewEntity> review = reviewRepository.getByUsername(username);
+        Optional<ReviewEntity> review = reviewRepository.getByChatId(chatId);
         if (review.isEmpty()) {
             throw new NoSuchReviewException();
         }
@@ -38,9 +38,9 @@ public class ReviewService {
         return review.get();
     }
 
-    public void deleteReview(String username) throws NoSuchReviewException {
+    public void deleteReview(Long chatId) throws NoSuchReviewException {
 
-        Optional<ReviewEntity> review = reviewRepository.getByUsername(username);
+        Optional<ReviewEntity> review = reviewRepository.getByChatId(chatId);
         if (review.isEmpty()) {
             throw new NoSuchReviewException();
         }

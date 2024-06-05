@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Configuration
 public class LogConfig {
@@ -38,7 +39,12 @@ public class LogConfig {
     }
 
     private void sendMessage(LogType logType, String message, Integer messageThreadId) {
-        String finalMessage = String.format("%s %s : %s", LocalDateTime.now(), logType, message);
+        String finalMessage = String.format(
+                "%s %s : %s",
+                ZonedDateTime.now(ZoneId.of("Etc/GMT+9")).toLocalDateTime(),
+                logType,
+                message
+        );
 
         loggerBot.execute(new SendMessage(
                 chatId,

@@ -16,8 +16,6 @@ services:
     image: 'cardio-bot:latest'
     depends_on:
       - cardio-db
-    ports:
-      - '5005:5005'
 
 volumes:
   cardio-db-volume:

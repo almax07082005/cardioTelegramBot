@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.service;
+package com.example.cardiotelegrambot.service.bot.main;
 
 import com.example.cardiotelegrambot.config.Logger;
 import com.example.cardiotelegrambot.config.enums.Buttons;
@@ -6,6 +6,7 @@ import com.example.cardiotelegrambot.entity.ReviewEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
 import com.example.cardiotelegrambot.exceptions.NotMemberException;
 import com.example.cardiotelegrambot.exceptions.ReviewExistException;
+import com.example.cardiotelegrambot.service.database.ReviewService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.ChatMember;
 import com.pengrad.telegrambot.model.Message;
@@ -117,8 +118,20 @@ public class Button {
         return this;
     }
 
+    public Button setByVariables(Long chatId) {
+        this.username = null;
+        this.chatId = chatId;
+
+        return this;
+    }
+
     private void inviteFriend() {
-        EditMessageText message = new EditMessageText(chatId, messageId, "Извините, но пока эта функция в работе.");
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                А вот и Ваша реферальная ссылка:
+                https://t.me/cardiozametki_bot?start=%s
+                """,
+                chatId
+        ));
 
         message.replyMarkup(new InlineKeyboardMarkup(
                 new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
@@ -134,7 +147,7 @@ public class Button {
 
             return is.readAllBytes();
         } catch (IOException exception) {
-            logger.logError(exception);
+            logger.logException(exception);
             return null;
         }
     }
@@ -152,7 +165,11 @@ public class Button {
                     .messageIds(messageIds)
                     .build()
             );
-            logger.logInfo(String.format("Review for user \"%s\" was added to database.", username));
+            logger.logInfo(String.format(
+                    "Review for user \"%s\"_%s was added to database.",
+                    username,
+                    chatId
+            ));
 
         } catch (ReviewExistException exception) {
             logger.logError(String.format(
@@ -164,7 +181,7 @@ public class Button {
 
     private void deleteReview() {
         try {
-            ReviewEntity review = reviewService.getReview(username);
+            ReviewEntity review = reviewService.getReview(chatId);
 
             for (Integer messageId : review.getMessageIds()) {
                 bot.execute(new DeleteMessage(
@@ -173,8 +190,12 @@ public class Button {
                 ));
             }
 
-            reviewService.deleteReview(username);
-            logger.logInfo(String.format("Review for user \"%s\" was deleted from database.", username));
+            reviewService.deleteReview(chatId);
+            logger.logInfo(String.format(
+                    "Review for user \"%s\"_%s was deleted from database.",
+                    username,
+                    chatId
+            ));
 
         } catch (NoSuchReviewException ignored) {}
     }
@@ -293,15 +314,23 @@ public class Button {
         bot.execute(message);
     }
 
+    public void isSubscribed() throws NotMemberException {
+        ChatMember.Status status = bot.execute(new GetChatMember(channelId, chatId))
+                .chatMember()
+                .status();
+
+        if (!(
+                status == ChatMember.Status.creator ||
+                status == ChatMember.Status.administrator ||
+                status == ChatMember.Status.member
+        )) {
+            throw new NotMemberException(username, chatId);
+        }
+    }
+
     private void getGuide() {
         try {
-            ChatMember.Status status = bot.execute(new GetChatMember(channelId, chatId))
-                    .chatMember()
-                    .status();
-
-            if (!(status == ChatMember.Status.creator || status == ChatMember.Status.administrator || status == ChatMember.Status.member)) {
-                throw new NotMemberException(username);
-            }
+            isSubscribed();
 
             EditMessageText message = new EditMessageText(
                     chatId,

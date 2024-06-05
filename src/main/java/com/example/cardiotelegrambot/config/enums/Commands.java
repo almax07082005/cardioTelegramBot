@@ -2,6 +2,7 @@ package com.example.cardiotelegrambot.config.enums;
 
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.util.Pair;
 
 @AllArgsConstructor
 public enum Commands {
@@ -15,11 +16,16 @@ public enum Commands {
         return name;
     }
 
-    public static Commands fromString(String name) throws NotCommandException {
+    public static Pair<Commands, String> fromString(String name) throws NotCommandException {
+
+        String[] commandsList = name.split(" ");
+        if (commandsList[0].equals("/start") && commandsList.length == 2) {
+            return Pair.of(Commands.start, commandsList[1]);
+        }
 
         for (Commands command : Commands.values()) {
             if (command.name.equals(name)) {
-                return command;
+                return Pair.of(command, "");
             }
         }
 
