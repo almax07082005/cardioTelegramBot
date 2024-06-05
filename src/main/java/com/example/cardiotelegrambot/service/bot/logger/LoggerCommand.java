@@ -3,6 +3,7 @@ package com.example.cardiotelegrambot.service.bot.logger;
 import com.example.cardiotelegrambot.config.enums.LoggerCommands;
 import com.example.cardiotelegrambot.exceptions.NotAdminException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
+import com.example.cardiotelegrambot.service.bot.main.Command;
 import com.example.cardiotelegrambot.service.database.UserService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -24,6 +25,7 @@ public class LoggerCommand {
 
     private final TelegramBot bot;
     private final UserService userService;
+    private final Command command;
     private Long chatId;
 
     @Value("${telegram.logger.id}")
@@ -38,9 +40,10 @@ public class LoggerCommand {
     private final Map<LoggerCommands, Runnable> mapCommands;
 
     @Autowired
-    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, UserService userService) {
+    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, UserService userService, Command command) {
         this.bot = bot;
         this.userService = userService;
+        this.command = command;
 
         mapCommands = new HashMap<>();
         mapCommands.put(LoggerCommands.start, this::start);
@@ -103,7 +106,7 @@ public class LoggerCommand {
     private void start() {
         bot.execute(new SendMessage(
                 chatId,
-                """
+                String.format("""
                         Привет, братанчик Азамат (а может и не только ты)! Тебе пишет твой верный слуга, бот для админов (в этом канале я заправляю, как ты уже понял), и вот, что ты можешь у меня спросить (просто нажми на нужную команду):
                         
                         /start - получить это сообщение;
@@ -111,8 +114,12 @@ public class LoggerCommand {
                         /finishReferral - завершить реферальную программу;
                         /getWinners - получить список победителей*.
                         
+                        Сейчас реферальная программа %s.
+                        
                         *Не бойся csv файла, просто открой его, он должен открыться как таблица через приложение Numbers на MacOS или Excel на Windows.
-                        """
+                        """,
+                        command.getBooleanReferralStatus() ? "АКТИВНА": "НЕ АКТИВНА"
+                )
         ));
     }
 

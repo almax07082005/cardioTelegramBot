@@ -127,14 +127,20 @@ public class Command {
         }
     }
 
-    private Pair<String, Boolean> updateLinkSender() {
-
+    public Boolean getBooleanReferralStatus() {
         boolean isProgramStarted;
+
         try (FileReader fileReader = new FileReader(referralFilename)) {
             isProgramStarted = Boolean.parseBoolean(readFromReferral(fileReader));
         } catch (IOException exception) {
             isProgramStarted = false;
         }
+
+        return isProgramStarted;
+    }
+
+    private Pair<String, Boolean> updateLinkSender() {
+        boolean isProgramStarted = getBooleanReferralStatus();
 
         boolean isReferral;
         try {
@@ -147,6 +153,11 @@ public class Command {
             return Pair.of("", isReferral);
         }
         if (!isProgramStarted) {
+            logger.logWarn(String.format(
+                    "User \"%s\"_%s tried to use unstarted referral program.",
+                    username,
+                    chatId
+            ));
             return Pair.of("Извините, сейчас реферальная программа не активна.", isReferral);
         }
 
