@@ -14,6 +14,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.InputMediaPhoto;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.request.GetChatMember;
@@ -23,6 +24,7 @@ import com.pengrad.telegrambot.response.MessagesResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +43,7 @@ public class Button {
     private final TelegramBot bot;
     private final ReviewService reviewService;
     private final Logger logger;
+    private final ConfigurableApplicationContext context;
 
     private Long chatId;
     private Integer messageId;
@@ -73,10 +76,11 @@ public class Button {
     private String educationLink;
 
     @Autowired
-    public Button(@Qualifier("mainBotBean") TelegramBot bot, ReviewService reviewService, Logger logger) {
+    public Button(@Qualifier("mainBotBean") TelegramBot bot, ReviewService reviewService, Logger logger, ConfigurableApplicationContext context) {
         this.bot = bot;
         this.reviewService = reviewService;
         this.logger = logger;
+        this.context = context;
 
         buttons = new HashMap<>();
         buttons.put(Buttons.inviteFriend, this::inviteFriend);
@@ -310,7 +314,10 @@ public class Button {
                 """, firstName
         ));
 
-        message.replyMarkup(Command.getInlineKeyboardMarkupForMainMenu());
+        message.replyMarkup(context
+                .getBean(Command.class)
+                .getInlineKeyboardMarkupForMainMenu()
+        );
         bot.execute(message);
     }
 
@@ -353,10 +360,10 @@ public class Button {
                     chatId,
                     messageId,
                     String.format("""
-                            Извините, но Вы не подписаны на канал "Заметки Кардиолога".
-                            Проверьте, подписаны ли Вы на канал %s, там много полезной информации!
-                            """, channelUsername)
-            );
+                            Извините, но Вы не подписаны на канал <a href="https://t.me/%s">Заметки Кардиолога</a>.
+                            """,
+                            channelUsername)
+            ).parseMode(ParseMode.HTML);
 
             message.replyMarkup(new InlineKeyboardMarkup().addRow(
                     new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name()),

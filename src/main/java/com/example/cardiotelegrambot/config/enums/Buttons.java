@@ -9,5 +9,6 @@ public enum Buttons {
     help,
     getBack,
     reviews,
-    education
+    education,
+    subscribe
 }

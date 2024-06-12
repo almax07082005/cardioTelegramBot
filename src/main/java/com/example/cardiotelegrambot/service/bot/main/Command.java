@@ -46,6 +46,9 @@ public class Command {
     @Value("${spring.data.referral}")
     private String referralFilename;
 
+    @Value("${telegram.channel.username}")
+    private String channelUsername;
+
     @Autowired
     public Command(@Qualifier("mainBotBean") TelegramBot bot, UserService userService, Logger logger) {
         this.bot = bot;
@@ -96,9 +99,12 @@ public class Command {
         return this;
     }
 
-    public static InlineKeyboardMarkup getInlineKeyboardMarkupForMainMenu() {
+    public InlineKeyboardMarkup getInlineKeyboardMarkupForMainMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
+        inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Подписаться на канал").callbackData(Buttons.subscribe.name()).url(String.format("https://t.me/%s", channelUsername))
+        );
         inlineKeyboardMarkup.addRow(
                 new InlineKeyboardButton("Пригласить друга").callbackData(Buttons.inviteFriend.name()),
                 new InlineKeyboardButton("Получить гайд").callbackData(Buttons.getGuide.name())

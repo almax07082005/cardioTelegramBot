@@ -24,7 +24,7 @@ telegram:
     username: "@baymukanov"
   channel:
     id: "-1001894647431"
-    username: "@abaymukanov"
+    username: "abaymukanov"
   assessRisks:
     link: "https://baymukanov.ru/survey"
   makeAppointment:
