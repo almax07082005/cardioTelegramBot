@@ -14,6 +14,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
@@ -164,7 +165,7 @@ public class Command {
                     username,
                     chatId
             ));
-            return Pair.of("Извините, сейчас реферальная программа не активна.", isReferral);
+            return Pair.of("Извините, сейчас реферальная программа не активна.\n", isReferral);
         }
 
         try {
@@ -189,7 +190,7 @@ public class Command {
                     user.getUsername(),
                     user.getChatId()
             ));
-            return Pair.of("Вы успешно зарегистрировались в реферальной программе!", true);
+            return Pair.of("\nВы успешно зарегистрировались в реферальной программе! Чтобы стать участником реферальной программы осталось лишь одно: <strong>подпишитесь на мой канал</strong>, нажав на кнопку внизу.\n", true);
 
         } catch (NumberFormatException | NoSuchUserException ignored) {
             logger.logWarn(String.format(
@@ -197,15 +198,15 @@ public class Command {
                     username,
                     chatId
             ));
-            return Pair.of("Извините, у Вас некорректная реферальная ссылка.", isReferral);
+            return Pair.of("Извините, у Вас некорректная реферальная ссылка.\n", isReferral);
 
         } catch (AlreadyReferralException exception) {
             logger.logWarn(exception.getMessage());
-            return Pair.of("Извините, Вы уже зарегистрировались в реферальной программе.", true);
+            return Pair.of("Извините, Вы уже зарегистрировались в реферальной программе.\n", true);
 
         } catch (SelfReferralException exception) {
             logger.logWarn(exception.getMessage());
-            return Pair.of("Кажется, Вы прошли по своей реферальной ссылке.", false);
+            return Pair.of("Кажется, Вы прошли по своей реферальной ссылке.\n", false);
         }
     }
 
@@ -213,10 +214,10 @@ public class Command {
         Pair<String, Boolean> isReferralPair = updateLinkSender();
         SendMessage message = new SendMessage(chatId, String.format("""
                 Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.
-                %s%n
+                %s
                 Выберите интересующий вас пункт меню.
                 """, firstName, isReferralPair.getFirst()
-        ));
+        )).parseMode(ParseMode.HTML);
 
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
         SendResponse response = bot.execute(message);
