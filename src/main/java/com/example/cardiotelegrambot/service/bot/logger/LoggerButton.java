@@ -1,6 +1,7 @@
 package com.example.cardiotelegrambot.service.bot.logger;
 
 import com.example.cardiotelegrambot.config.enums.logger.LoggerButtons;
+import com.example.cardiotelegrambot.service.database.ReferralService;
 import com.example.cardiotelegrambot.service.database.UserService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.DeleteMessage;
@@ -14,8 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,18 +28,16 @@ public class LoggerButton {
 
     @Setter
     private static Integer messageId;
+    private final ReferralService referralService;
 
     @Value("${spring.data.table}")
     private String tableFilename;
-
-    @Value("${spring.data.referral}")
-    private String referralFilename;
 
     @Value("${telegram.logger.id}")
     private Long adminChatId;
 
     @Autowired
-    public LoggerButton(@Qualifier("loggerBotBean") TelegramBot bot, LoggerCommand loggerCommand, UserService userService) {
+    public LoggerButton(@Qualifier("loggerBotBean") TelegramBot bot, LoggerCommand loggerCommand, UserService userService, ReferralService referralService) {
         this.bot = bot;
 
         buttons = new HashMap<>();
@@ -50,6 +47,7 @@ public class LoggerButton {
         buttons.put(LoggerButtons.getWinners, this::getWinners);
         this.loggerCommand = loggerCommand;
         this.userService = userService;
+        this.referralService = referralService;
     }
 
     public LoggerButton deleteLastMessage() {
@@ -80,21 +78,11 @@ public class LoggerButton {
     }
 
     private void startReferral() {
-        SendMessage message;
-
-        try (FileWriter fileWriter = new FileWriter(referralFilename)) {
-            fileWriter.write("true");
-            message = new SendMessage(
-                    adminChatId,
-                    "Реферальная программа запущена успешно."
-            );
-        } catch (IOException ignored) {
-            message = new SendMessage(
-                    adminChatId,
-                    "Фиг его знает, че-то не сработало, надо разбираться."
-            );
-        }
-
+        referralService.startReferral();
+        SendMessage message = new SendMessage(
+                adminChatId,
+                "Реферальная программа запущена успешно."
+        );
         message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
 
         SendResponse response = bot.execute(message);
@@ -102,21 +90,11 @@ public class LoggerButton {
     }
 
     private void finishReferral() {
-        SendMessage message;
-
-        try (FileWriter fileWriter = new FileWriter(referralFilename)) {
-            fileWriter.write("false");
-            message = new SendMessage(
-                    adminChatId,
-                    "Реферальная программа завершена успешно."
-            );
-        } catch (IOException ignored) {
-            message = new SendMessage(
-                    adminChatId,
-                    "Фиг его знает, че-то не сработало, надо разбираться."
-            );
-        }
-
+        referralService.finishReferral();
+        SendMessage message = new SendMessage(
+                adminChatId,
+                "Реферальная программа завершена успешно."
+        );
         message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
 
         SendResponse response = bot.execute(message);

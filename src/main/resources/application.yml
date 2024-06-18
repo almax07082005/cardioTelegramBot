@@ -12,7 +12,6 @@ spring:
       ddl-auto: "update"
   data:
     table: "winners.csv"
-    referral: "referral.txt"
 
 telegram:
   logger:

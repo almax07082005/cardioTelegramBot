@@ -9,6 +9,7 @@ import com.example.cardiotelegrambot.exceptions.NoSuchUserException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
 import com.example.cardiotelegrambot.exceptions.SelfReferralException;
 import com.example.cardiotelegrambot.exceptions.UserExistException;
+import com.example.cardiotelegrambot.service.database.ReferralService;
 import com.example.cardiotelegrambot.service.database.UserService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -24,8 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +35,7 @@ public class Command {
     private final TelegramBot bot;
     private final UserService userService;
     private final Logger logger;
+    private final ReferralService referralService;
 
     private Long chatId;
     private Integer messageId;
@@ -44,17 +44,15 @@ public class Command {
     private String referralLink;
     private final Map<Commands, Runnable> mapCommands;
 
-    @Value("${spring.data.referral}")
-    private String referralFilename;
-
     @Value("${telegram.channel.username}")
     private String channelUsername;
 
     @Autowired
-    public Command(@Qualifier("mainBotBean") TelegramBot bot, UserService userService, Logger logger) {
+    public Command(@Qualifier("mainBotBean") TelegramBot bot, UserService userService, Logger logger, ReferralService referralService) {
         this.bot = bot;
         this.userService = userService;
         this.logger = logger;
+        this.referralService = referralService;
 
         mapCommands = new HashMap<>();
         mapCommands.put(Commands.start, this::start);
@@ -124,31 +122,7 @@ public class Command {
         return inlineKeyboardMarkup;
     }
 
-    private String readFromReferral(FileReader reader) throws IOException {
-        char[] buffer = new char[5];
-        int charactersRead = reader.read(buffer, 0, 5);
-        if (charactersRead != -1) {
-            return new String(buffer, 0, charactersRead);
-        } else {
-            return "";
-        }
-    }
-
-    public Boolean getBooleanReferralStatus() {
-        boolean isProgramStarted;
-
-        try (FileReader fileReader = new FileReader(referralFilename)) {
-            isProgramStarted = Boolean.parseBoolean(readFromReferral(fileReader));
-        } catch (IOException ignored) {
-            isProgramStarted = false;
-        }
-
-        return isProgramStarted;
-    }
-
     private Pair<String, Boolean> updateLinkSender() {
-        boolean isProgramStarted = getBooleanReferralStatus();
-
         boolean isReferral;
         try {
             isReferral = userService.getByChatId(chatId).getIsReferral();
@@ -159,7 +133,7 @@ public class Command {
         if (referralLink.isBlank()) {
             return Pair.of("", isReferral);
         }
-        if (!isProgramStarted) {
+        if (!referralService.isPresent()) {
             logger.logWarn(String.format(
                     "User \"%s\"_%s tried to use unstarted referral program.",
                     username,

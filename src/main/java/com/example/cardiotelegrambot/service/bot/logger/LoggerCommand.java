@@ -4,7 +4,7 @@ import com.example.cardiotelegrambot.config.enums.logger.LoggerButtons;
 import com.example.cardiotelegrambot.config.enums.logger.LoggerCommands;
 import com.example.cardiotelegrambot.exceptions.NotAdminException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
-import com.example.cardiotelegrambot.service.bot.main.Command;
+import com.example.cardiotelegrambot.service.database.ReferralService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -23,7 +23,7 @@ import java.util.Map;
 public class LoggerCommand {
 
     private final TelegramBot bot;
-    private final Command command;
+    private final ReferralService referralService;
 
     @Value("${telegram.logger.id}")
     private Long adminChatId;
@@ -31,9 +31,9 @@ public class LoggerCommand {
     private final Map<LoggerCommands, Runnable> mapCommands;
 
     @Autowired
-    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, Command command) {
+    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, ReferralService referralService) {
         this.bot = bot;
-        this.command = command;
+        this.referralService = referralService;
 
         mapCommands = new HashMap<>();
         mapCommands.put(LoggerCommands.start, this::start);
@@ -70,7 +70,7 @@ public class LoggerCommand {
                         
                         *Не бойся csv файла, просто открой его, он должен открыться как таблица через приложение Numbers на MacOS или Excel на Windows.
                         """,
-                        command.getBooleanReferralStatus() ? "АКТИВНА": "НЕ АКТИВНА"
+                        referralService.isPresent() ? "АКТИВНА": "НЕ АКТИВНА"
                 ));
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
 
