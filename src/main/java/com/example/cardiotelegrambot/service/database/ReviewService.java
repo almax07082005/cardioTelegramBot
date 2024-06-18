@@ -4,20 +4,16 @@ import com.example.cardiotelegrambot.entity.ReviewEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
 import com.example.cardiotelegrambot.exceptions.ReviewExistException;
 import com.example.cardiotelegrambot.repository.ReviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-
-    @Autowired
-    public ReviewService(ReviewRepository reviewRepository) {
-        this.reviewRepository = reviewRepository;
-    }
 
     public void createReview(ReviewEntity review) throws ReviewExistException {
 

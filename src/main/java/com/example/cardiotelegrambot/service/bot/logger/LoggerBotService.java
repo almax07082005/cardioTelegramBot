@@ -52,6 +52,7 @@ public class LoggerBotService {
 
     private void executeButton(Update update) {
         button
+                .deleteLastMessage()
                 .getButton(LoggerButtons.valueOf(update
                         .callbackQuery()
                         .data()

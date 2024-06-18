@@ -3,8 +3,11 @@ package com.example.cardiotelegrambot.service.bot.logger;
 import com.example.cardiotelegrambot.config.enums.logger.LoggerButtons;
 import com.example.cardiotelegrambot.service.database.UserService;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +26,9 @@ public class LoggerButton {
     private final Map<LoggerButtons, Runnable> buttons;
     private final LoggerCommand loggerCommand;
     private final UserService userService;
+
+    @Setter
+    private static Integer messageId;
 
     @Value("${spring.data.table}")
     private String tableFilename;
@@ -46,6 +52,17 @@ public class LoggerButton {
         this.userService = userService;
     }
 
+    public LoggerButton deleteLastMessage() {
+        try {
+            bot.execute(new DeleteMessage(
+                    adminChatId,
+                    messageId
+            ));
+        } catch (NullPointerException ignored) {}
+
+        return this;
+    }
+
     public Runnable getButton(LoggerButtons button) {
         return buttons.get(button);
     }
@@ -57,7 +74,9 @@ public class LoggerButton {
                 new File(tableFilename)
         );
         document.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
-        bot.execute(document);
+
+        SendResponse response = bot.execute(document);
+        messageId = response.message().messageId();
     }
 
     private void startReferral() {
@@ -77,7 +96,9 @@ public class LoggerButton {
         }
 
         message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
-        bot.execute(message);
+
+        SendResponse response = bot.execute(message);
+        messageId = response.message().messageId();
     }
 
     private void finishReferral() {
@@ -97,6 +118,8 @@ public class LoggerButton {
         }
 
         message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
-        bot.execute(message);
+
+        SendResponse response = bot.execute(message);
+        messageId = response.message().messageId();
     }
 }

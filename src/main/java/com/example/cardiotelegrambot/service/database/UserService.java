@@ -8,9 +8,9 @@ import com.example.cardiotelegrambot.exceptions.UserExistException;
 import com.example.cardiotelegrambot.repository.UserRepository;
 import com.example.cardiotelegrambot.service.bot.main.Button;
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
@@ -29,13 +30,6 @@ public class UserService {
 
     @Value("${spring.data.table}")
     private String tableFilename;
-
-    @Autowired
-    public UserService(UserRepository userRepository, Logger logger, Button button) {
-        this.userRepository = userRepository;
-        this.logger = logger;
-        this.button = button;
-    }
 
     public void createUser(UserEntity user) throws UserExistException {
 

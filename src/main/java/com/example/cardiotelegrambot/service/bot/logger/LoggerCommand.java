@@ -10,6 +10,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +73,9 @@ public class LoggerCommand {
                         command.getBooleanReferralStatus() ? "АКТИВНА": "НЕ АКТИВНА"
                 ));
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
-        bot.execute(message);
+
+        SendResponse response = bot.execute(message);
+        LoggerButton.setMessageId(response.message().messageId());
     }
 
     public InlineKeyboardMarkup getInlineKeyboardMarkupForMainMenu() {
