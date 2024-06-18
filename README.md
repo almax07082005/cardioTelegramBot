@@ -8,6 +8,13 @@ This telegram bot intends to promote information about cardiology.
 
 When referral program is active, in case the docker container gets deleted and run again (not rerun of the container), it is obligatory to execute ```/startReferral``` command in the admin channel.
 
+### To debug docker container
+
+To debug application in docker container just proceed with the following steps:
+
+1. Open port ```5005``` in ```compose.yaml``` file.
+2. Change JVM Remote Debug host to current ip address.
+
 ### To build the server proceed with the following steps:
 
 1. Clone this repo to your local machine with the command: ```git clone https://github.com/almax07082005/cardioTelegramBot.git```.
