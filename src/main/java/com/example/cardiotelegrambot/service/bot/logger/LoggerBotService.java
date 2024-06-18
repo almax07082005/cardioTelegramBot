@@ -1,6 +1,7 @@
 package com.example.cardiotelegrambot.service.bot.logger;
 
 import com.example.cardiotelegrambot.config.Logger;
+import com.example.cardiotelegrambot.config.enums.logger.LoggerButtons;
 import com.example.cardiotelegrambot.exceptions.NotAdminException;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -16,19 +17,24 @@ public class LoggerBotService {
     private final TelegramBot bot;
     private final Logger logger;
     private final LoggerCommand command;
+    private final LoggerButton button;
+    private final LoggerCommand loggerCommand;
 
     @Autowired
-    public LoggerBotService(@Qualifier("loggerBotBean") TelegramBot bot, Logger logger, LoggerCommand command) {
+    public LoggerBotService(@Qualifier("loggerBotBean") TelegramBot bot, Logger logger, LoggerCommand command, LoggerButton button, LoggerCommand loggerCommand) {
         this.bot = bot;
         this.logger = logger;
         this.command = command;
+        this.button = button;
+        this.loggerCommand = loggerCommand;
     }
 
     public void startBot() {
         bot.setUpdatesListener(updates -> {
             try {
                 for (Update update : updates) {
-                    executeCommand(update);
+                    if (update.callbackQuery() != null) executeButton(update);
+                    else executeCommand(update);
                 }
             } catch (Exception exception) {
                 logger.logException(exception);
@@ -44,6 +50,15 @@ public class LoggerBotService {
         });
     }
 
+    private void executeButton(Update update) {
+        button
+                .getButton(LoggerButtons.valueOf(update
+                        .callbackQuery()
+                        .data()
+                ))
+                .run();
+    }
+
     private void executeCommand(Update update) {
         try {
             command
@@ -53,10 +68,12 @@ public class LoggerBotService {
                             .text())
                     .run();
         } catch (NotAdminException exception) {
-            bot.execute(new SendMessage(
+            SendMessage message = new SendMessage(
                     update.message().chat().id(),
                     exception.getMessage()
-            ));
+            );
+            message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
+            bot.execute(message);
         }
     }
 }

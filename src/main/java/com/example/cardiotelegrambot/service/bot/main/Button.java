@@ -1,7 +1,7 @@
 package com.example.cardiotelegrambot.service.bot.main;
 
 import com.example.cardiotelegrambot.config.Logger;
-import com.example.cardiotelegrambot.config.enums.Buttons;
+import com.example.cardiotelegrambot.config.enums.main.Buttons;
 import com.example.cardiotelegrambot.entity.ReviewEntity;
 import com.example.cardiotelegrambot.exceptions.NoSuchReviewException;
 import com.example.cardiotelegrambot.exceptions.NotMemberException;

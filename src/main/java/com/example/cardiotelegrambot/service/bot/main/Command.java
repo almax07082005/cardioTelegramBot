@@ -1,8 +1,8 @@
 package com.example.cardiotelegrambot.service.bot.main;
 
 import com.example.cardiotelegrambot.config.Logger;
-import com.example.cardiotelegrambot.config.enums.Buttons;
-import com.example.cardiotelegrambot.config.enums.Commands;
+import com.example.cardiotelegrambot.config.enums.main.Buttons;
+import com.example.cardiotelegrambot.config.enums.main.Commands;
 import com.example.cardiotelegrambot.entity.UserEntity;
 import com.example.cardiotelegrambot.exceptions.AlreadyReferralException;
 import com.example.cardiotelegrambot.exceptions.NoSuchUserException;

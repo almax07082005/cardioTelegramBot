@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.config.enums;
+package com.example.cardiotelegrambot.config.enums.main;
 
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
 import lombok.AllArgsConstructor;

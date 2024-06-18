@@ -1,7 +1,7 @@
 package com.example.cardiotelegrambot.service.bot.main;
 
 import com.example.cardiotelegrambot.config.Logger;
-import com.example.cardiotelegrambot.config.enums.Buttons;
+import com.example.cardiotelegrambot.config.enums.main.Buttons;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
@@ -57,7 +57,8 @@ public class BotService {
                 .setByUpdate(update)
                 .getButton(Buttons.valueOf(update
                         .callbackQuery()
-                        .data()))
+                        .data()
+                ))
                 .run();
     }
 

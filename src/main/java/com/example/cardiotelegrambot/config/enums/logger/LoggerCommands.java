@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.config.enums;
+package com.example.cardiotelegrambot.config.enums.logger;
 
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
 import lombok.AllArgsConstructor;
@@ -6,10 +6,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum LoggerCommands {
 
-    start("/start"),
-    startReferral("/startReferral"),
-    finishReferral("/finishReferral"),
-    getWinners("/getWinners");
+    start("/start");
 
     private final String name;
 

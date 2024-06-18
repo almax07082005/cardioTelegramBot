@@ -1,4 +1,4 @@
-package com.example.cardiotelegrambot.config.enums;
+package com.example.cardiotelegrambot.config.enums.main;
 
 public enum Buttons {
     inviteFriend,
