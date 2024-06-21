@@ -115,14 +115,76 @@ public class Command {
                 new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name())
         );
         inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton("Обо мне").callbackData(Buttons.aboutMe.name()),
+                new InlineKeyboardButton("Информация о докторе").callbackData(Buttons.aboutMe.name()),
                 new InlineKeyboardButton("Помощь с ботом").callbackData(Buttons.help.name())
         );
 
         return inlineKeyboardMarkup;
     }
 
+    private class Response {
+
+        String selfReferral() {
+            return """
+                    Упс! Вы перешли по своей же реферальной ссылке. Отправьте приглашение другу снова 😊
+                    """;
+        }
+
+        String success() {
+            return String.format("""
+                    Приветствую%s
+                    Перейдя по ссылке, вы зарегистрировались в реферальной программе! Осталось только <strong>ПОДПИСАТЬСЯ НА КАНАЛ</strong> ⏬️️
+                    """, (isRegistered() ? " еще раз!\n" : String.format("""
+                    , %s!
+                    Я — бот-помощник кардиолога Азамата Баймуканова.
+                    """, firstName))
+            );
+        }
+
+        String noReferral() {
+            return String.format("""
+                    Приветствую, %s!
+                    Я — бот-помощник кардиолога Азамата Баймуканова.
+                    
+                    Выберите, что вас интересует ⏬️
+                    """, firstName
+            );
+        }
+
+        String incorrectReferral() {
+            return String.format("""
+                    Приветствую%s
+                    Ошибочка вышла! Перейдите по ссылке еще раз 😊
+                    """, (isRegistered() ? " еще раз!\n" : String.format("""
+                    , %s!
+                    Я — бот-помощник кардиолога Азамата Баймуканова.
+                    """, firstName))
+            );
+        }
+
+        String alreadyReferral() {
+            return """
+                    Приветствую еще раз!
+                    
+                    А вы уже зарегистрированы в реферальной программе 😉
+                    
+                    Выберите, что вас интересует ⏬️️
+                    """;
+        }
+
+        private Boolean isRegistered() {
+            try {
+                userService.getByChatId(chatId);
+                return true;
+            } catch (NoSuchUserException exception) {
+                return false;
+            }
+        }
+    }
+
     private Pair<String, Boolean> updateLinkSender() {
+        Response response = new Response();
+
         boolean isReferral;
         try {
             isReferral = userService.getByChatId(chatId).getIsReferral();
@@ -131,7 +193,7 @@ public class Command {
         }
 
         if (referralLink.isBlank()) {
-            return Pair.of("", isReferral);
+            return Pair.of(response.noReferral(), isReferral);
         }
         if (!referralService.isPresent()) {
             logger.logWarn(String.format(
@@ -139,7 +201,7 @@ public class Command {
                     username,
                     chatId
             ));
-            return Pair.of("Извините, сейчас реферальная программа не активна.\n", isReferral);
+            return Pair.of(response.noReferral(), isReferral);
         }
 
         try {
@@ -164,7 +226,7 @@ public class Command {
                     user.getUsername(),
                     user.getChatId()
             ));
-            return Pair.of("\nВы успешно зарегистрировались в реферальной программе! Чтобы стать участником реферальной программы осталось лишь одно: <strong>подпишитесь на мой канал</strong>, нажав на кнопку внизу.\n", true);
+            return Pair.of(response.success(), true);
 
         } catch (NumberFormatException | NoSuchUserException ignored) {
             logger.logWarn(String.format(
@@ -172,27 +234,22 @@ public class Command {
                     username,
                     chatId
             ));
-            return Pair.of("Извините, у Вас некорректная реферальная ссылка.\n", isReferral);
+            return Pair.of(response.incorrectReferral(), isReferral);
 
         } catch (AlreadyReferralException exception) {
             logger.logWarn(exception.getMessage());
-            return Pair.of("Извините, Вы уже зарегистрировались в реферальной программе.\n", true);
+            return Pair.of(response.alreadyReferral(), true);
 
         } catch (SelfReferralException exception) {
             logger.logWarn(exception.getMessage());
-            return Pair.of("Кажется, Вы прошли по своей реферальной ссылке.\n", false);
+            return Pair.of(response.selfReferral(), false);
         }
     }
 
     private void start() {
         Pair<String, Boolean> isReferralPair = updateLinkSender();
-        SendMessage message = new SendMessage(chatId, String.format("""
-                Здравствуйте, %s! Я бот-помощник кардиолога Азамата Баймуканова.
-                %s
-                Выберите интересующий вас пункт меню.
-                """, firstName, isReferralPair.getFirst()
-        )).parseMode(ParseMode.HTML);
 
+        SendMessage message = new SendMessage(chatId, isReferralPair.getFirst()).parseMode(ParseMode.HTML);
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
         SendResponse response = bot.execute(message);
         notACommand();

@@ -47,7 +47,6 @@ public class Button {
 
     private Long chatId;
     private Integer messageId;
-    private String firstName;
     private String username;
     private final Map<Buttons, Runnable> buttons;
 
@@ -109,11 +108,6 @@ public class Button {
                 .message()
                 .messageId();
 
-        firstName = update
-                .callbackQuery()
-                .from()
-                .firstName();
-
         username = update
                 .callbackQuery()
                 .from()
@@ -131,7 +125,8 @@ public class Button {
 
     private void inviteFriend() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                А вот и Ваша реферальная ссылка:
+                Скопируйте и отправьте ссылку другу:
+                
                 https://t.me/cardiozametki_bot?start=%s
                 """,
                 chatId
@@ -217,9 +212,9 @@ public class Button {
         createReview(response.messages());
 
         SendMessage message = new SendMessage(chatId, String.format("""
-                Вот несколько отзывов с проверенного сайта!
-                С остальными отзывами можно ознакомиться здесь:
-                %s
+                Несколько отзывов с проверенного сайта 😉
+                Хотите еще? Переходите по ссылке ⏬️️️
+                %n%s
                 """, reviewsLink
         ));
 
@@ -232,9 +227,8 @@ public class Button {
 
     private void education() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Здесь всё об образовании Баймуканова Азамата.
-                Ознакомиться по ссылке:
-                %s
+                Образование и карьера доктора Баймуканова⏬️️️
+                %n%s
                 """, educationLink
         ));
 
@@ -248,15 +242,16 @@ public class Button {
     private void aboutMe() {
         deleteReview();
         EditMessageText message = new EditMessageText(chatId, messageId, """
-                Здесь информация обо мне.
-                Выберите интересующее Вас меню.
+                Опыт и экспертность доктора Баймуканова.
+                
+                Выберите, что вас интересует ⏬️️
                 """
         );
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton("Отзывы").callbackData(Buttons.reviews.name()),
-                new InlineKeyboardButton("Образование").callbackData(Buttons.education.name())
+                new InlineKeyboardButton("Образование").callbackData(Buttons.education.name()),
+                new InlineKeyboardButton("Отзывы").callbackData(Buttons.reviews.name())
         );
         inlineKeyboardMarkup.addRow(
                 new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
@@ -268,8 +263,10 @@ public class Button {
 
     private void makeAppointment() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Записаться на консультацию Вы можете здесь:
-                %s
+                Оставьте заявку на онлайн-консультацию ⏬️️
+                
+                В течение 24ч с вами свяжутся и согласуют удобное время.
+                %n%s
                 """, makeAppointmentLink
         ));
 
@@ -281,8 +278,8 @@ public class Button {
 
     private void assessRisks() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Оценить свой сердечно-сосудистый риск Вы сможете здесь:
-                %s
+                Оценить свой сердечно-сосудистый риск ⏬️️
+                %n%s
                 """, assessRisksLink
         ));
 
@@ -294,9 +291,7 @@ public class Button {
 
     private void help() {
         EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Сожалеем, что у Вас что-то не работает так, как нужно.
-                С любыми вопросами Вы можете обратиться к моему создателю.
-                А вот и его аккаунт: %s
+                Я — бот-новичок и могу делать ошибки. Напишите моему создателю %s, помогите мне стать лучше 😇
                 """, creatorUsername
         ));
 
@@ -308,11 +303,12 @@ public class Button {
 
     private void getBack() {
         deleteReview();
-        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                И снова здравствуйте, %s! Опять я, бот-помощник кардиолога Азамата Баймуканова.%n
-                Выберите интересующий вас пункт меню.
-                """, firstName
-        ));
+        EditMessageText message = new EditMessageText(chatId, messageId, """
+                И снова на связи я, бот-помощник Азамата Баймуканова 👋
+                
+                Выберите, что вас интересует ⏬️️
+                """
+        );
 
         message.replyMarkup(context
                 .getBean(Command.class)
@@ -343,8 +339,9 @@ public class Button {
                     chatId,
                     messageId,
                     String.format("""
-                            А вот и Ваш гайд! (доступен по ссылке на Яндекс диске)
-                            %s
+                            Экспертный гайд Азамата Баймуканова "Как сохранить здоровье сердца после 30 лет".
+                            Скачать ⏬️️
+                            %n%s
                             """, linkToFile)
             );
 
@@ -360,7 +357,9 @@ public class Button {
                     chatId,
                     messageId,
                     String.format("""
-                            Извините, но Вы не подписаны на канал <a href="https://t.me/%s">Заметки Кардиолога</a>.
+                            Упс! Попробуем еще раз! Подпишитесь на канал
+                            
+                            <a href="https://t.me/%s">Заметки Кардиолога</a> ⏬️️
                             """,
                             channelUsername)
             ).parseMode(ParseMode.HTML);
