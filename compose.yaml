@@ -15,6 +15,7 @@ services:
   cardio-bot:
     image: 'cardio-bot:latest'
     env_file: .env
+    tty: true
     depends_on:
       - cardio-db
 
