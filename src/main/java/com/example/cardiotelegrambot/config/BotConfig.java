@@ -4,16 +4,14 @@ import com.pengrad.telegrambot.TelegramBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
-@PropertySource("classpath:hidden.properties")
 @Configuration
 public class BotConfig {
 
-    @Value("${telegram.bot.token}")
+    @Value("${telegram.bot.main-token}")
     private String token;
 
-    @Value("${telegram.logger-bot.token}")
+    @Value("${telegram.bot.logger-token}")
     private String tokenLogger;
 
     @Bean("mainBotBean")

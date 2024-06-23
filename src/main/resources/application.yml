@@ -1,11 +1,11 @@
 spring:
   application:
     name: "cardioTelegramBot"
-  file:
-    location: "src/main/resources"
   datasource:
     url: "jdbc:postgresql://cardio-db:5432/cardio-db"
     driver-class-name: "org.postgresql.Driver"
+    username: "${POSTGRES_USER}"
+    password: "${POSTGRES_PASSWORD}"
   jpa:
     database: "postgresql"
     hibernate:
@@ -14,6 +14,11 @@ spring:
     table: "winners.csv"
 
 telegram:
+  guide:
+    file: "${GUIDE}"
+  bot:
+    main-token: "${MAIN_TOKEN}"
+    logger-token: "${LOGGER_TOKEN}"
   logger:
     id: "-1002118949277"
     info: "62"
