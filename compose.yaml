@@ -3,6 +3,9 @@ name: "cardio-bot-app"
 services:
   cardio-db:
     image: 'postgres:latest'
+    tty: true
+    env_file: ./.env
+    container_name: 'cardio-db'
     environment:
       - 'POSTGRES_DB=cardio-db'
       - 'POSTGRES_USER=${POSTGRES_USER}'
@@ -14,7 +17,8 @@ services:
 
   cardio-bot:
     image: 'cardio-bot:latest'
-    env_file: .env
+    container_name: 'cardio-bot'
+    env_file: ./.env
     tty: true
     depends_on:
       - cardio-db

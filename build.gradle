@@ -36,6 +36,17 @@ bootJar {
 	archiveFileName = "cardioBot.jar"
 }
 
+tasks.register("stopDockerImage", Exec) {
+	group "docker"
+	commandLine "docker", "compose", "down"
+}
+
+tasks.register("bootJarWithStop") {
+	group "build"
+	dependsOn bootJar
+	dependsOn stopDockerImage
+}
+
 tasks.register("buildDeployDockerImage", Exec) {
 	group "docker"
 	dependsOn bootJar
@@ -48,13 +59,20 @@ tasks.register("buildDockerImage", Exec) {
 	commandLine "docker", "build", "-t", "cardio-bot", "."
 }
 
+tasks.register("rebuildDockerImage", Exec) {
+	group "docker"
+	dependsOn bootJarWithStop
+	commandLine "docker", "build", "-t", "cardio-bot", "."
+}
+
 tasks.register("startDockerImage", Exec) {
 	group "docker"
 	dependsOn buildDockerImage
 	commandLine "docker", "compose", "up", "-d"
 }
 
-tasks.register("stopDockerImage", Exec) {
+tasks.register("restartDockerImage", Exec) {
 	group "docker"
-	commandLine "docker", "compose", "down"
+	dependsOn rebuildDockerImage
+	commandLine "docker", "compose", "up", "-d"
 }
