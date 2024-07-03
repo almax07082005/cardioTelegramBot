@@ -337,11 +337,12 @@ public class Button {
                     chatId,
                     messageId,
                     String.format("""
-                            Экспертный гайд Азамата Баймуканова "Как сохранить здоровье сердца после 30 лет".
-                            Скачать ⏬️️
-                            %n%s
+                            Экспертный гайд Азамата Баймуканова
+                            "<a href="%s">Как сохранить здоровье сердца после 30 лет</a>".
+                            
+                            Скачать ⏫️
                             """, linkToFile)
-            );
+            ).parseMode(ParseMode.HTML);
 
             message.replyMarkup(new InlineKeyboardMarkup(
                     new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())

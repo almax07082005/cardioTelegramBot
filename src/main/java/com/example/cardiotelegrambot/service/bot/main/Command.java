@@ -115,7 +115,7 @@ public class Command {
                 new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name())
         );
         inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton("Информация о докторе").callbackData(Buttons.aboutMe.name()),
+                new InlineKeyboardButton("О докторе").callbackData(Buttons.aboutMe.name()),
                 new InlineKeyboardButton("Помощь с ботом").callbackData(Buttons.help.name())
         );
 
