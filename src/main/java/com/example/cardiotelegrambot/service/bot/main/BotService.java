@@ -29,9 +29,8 @@ public class BotService {
         bot.setUpdatesListener(updates -> {
             try {
                 for (Update update : updates) {
-                    if (update.message() == null) continue;
                     if (update.callbackQuery() != null) executeButton(update);
-                    else executeCommand(update);
+                    else if (update.message() != null) executeCommand(update);
                 }
             } catch (Exception exception) {
                 logger.logException(exception);
