@@ -36,6 +36,13 @@ To debug application in docker container just proceed with the following steps:
 6. Add to the beginning of the image name ```almaxgood/``` in ```compose.yaml``` file.
 7. Start docker container with ```docker compose up -d``` command.
 
+### Transfer docker volume between VMs
+
+1. ```docker run --rm -v <your_volume_name>:/volume -v $(pwd):/backup busybox tar czvf /backup/backup.tar.gz -C /volume .```
+2. ```scp backup.tar.gz user@<destination_vm>:</path/to/destination>```
+3. ```docker volume create <new_volume_name>```
+4. ```docker run --rm -v <new_volume_name>:/volume -v </path/to/destination>:/backup busybox tar xzvf /backup/backup.tar.gz -C /volume```
+
 ## Add button
 
 1. Add name of the button to ```Buttons``` enum.
