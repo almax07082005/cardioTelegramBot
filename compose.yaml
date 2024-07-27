@@ -6,6 +6,7 @@ services:
     tty: true
     env_file: ./.env
     container_name: 'cardio-db'
+    restart: always
     environment:
       - 'POSTGRES_DB=cardio-db'
       - 'POSTGRES_USER=${POSTGRES_USER}'
@@ -19,6 +20,7 @@ services:
     image: 'cardio-bot:latest'
     container_name: 'cardio-bot'
     env_file: ./.env
+    restart: always
     tty: true
     depends_on:
       - cardio-db
