@@ -17,7 +17,7 @@ services:
       - 'cardio-db-volume:/var/lib/postgresql/data'
 
   cardio-bot:
-    image: 'cardio-bot:latest'
+    image: 'cardio-bot:${DOCKER_TAG}'
     container_name: 'cardio-bot'
     env_file: ./.env
     restart: always
