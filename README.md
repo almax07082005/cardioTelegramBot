@@ -4,6 +4,8 @@ This telegram bot intends to promote information about cardiology.
 
 ## Instructions
 
+#### !!CHANGE DOCKER_TAG GITHUB VARIABLE FOR NEW PRODUCTION VERSION!!
+
 ### To debug docker container
 
 To debug application in docker container just proceed with the following steps:
@@ -20,21 +22,18 @@ To debug application in docker container just proceed with the following steps:
    3. ```MAIN_TOKEN```
    4. ```LOGGER_TOKEN```
    5. ```GUIDE```
+   6. ```DOCKER_TAG```
 3. Start your application with ```restartDockerImage``` gradle custom task.
 
 ### To deploy the server proceed with the following steps:
 
-1. Execute ```buildDeployDockerImage``` gradle task.
-2. Push (through Docker Desktop) produced image to the DockerHub.
-3. Get connected to the VPS (e.g. through Termius).
-4. Execute the sequence of the following commands:
-   1. ```sudo apt update && sudo apt upgrade```
-   2. Proceed with this documentation: https://docs.docker.com/engine/install/ubuntu/
-   3. ```docker login```
-   4. ```mkdir app && cd app```
-5. Copy ```compose.yaml``` and ```.env``` files to this folder (e.g. through Termius SFTP).
-6. Add to the beginning of the image name ```almaxgood/``` in ```compose.yaml``` file.
-7. Start docker container with ```docker compose up -d``` command.
+1. Setup VM
+2. Install Docker (https://docs.docker.com/engine/install/ubuntu/)
+3. Login to Docker Hub
+4. Create directory with the name given in CD.yml
+5. Copy there compose.yaml
+6. Change image name in compose.yaml file
+7. Update GitHub secrets and variables
 
 ### Transfer docker volume between VMs
 
