@@ -22,13 +22,31 @@ jobs:
         run: ./gradlew bootJar
 
       - name: Build Docker image
-        run: docker build --platform linux/amd64 -t almaxgood/cardio-bot:1.0.0 .
+        run: docker build --platform linux/amd64 -t almaxgood/cardio-bot:${{ vars.DOCKER_TAG }} .
 
       - name: Push Docker image
-        run: docker push almaxgood/cardio-bot:1.0.0
+        run: docker push almaxgood/cardio-bot:${{ vars.DOCKER_TAG }}
 
       - name: Install sshpass
         run: sudo apt install sshpass
+
+      - name: Compose .env file
+        run: |
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }}>>.env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}>>.env
+          echo MAIN_TOKEN=${{ secrets.MAIN_TOKEN }}>>.env
+          echo LOGGER_TOKEN=${{ secrets.LOGGER_TOKEN }}>>.env
+          echo GUIDE=${{ secrets.GUIDE }}>>.env
+          echo DOCKER_TAG=${{ vars.DOCKER_TAG }}>>.env
+
+      - name: Copy .env file to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: root
+          password: ${{ secrets.VM_PASSWORD }}
+          source: ./.env
+          target: ~/cardio-bot
 
       - name: Run on VM
         run: sshpass -p ${{ secrets.VM_PASSWORD }} ssh -o StrictHostKeyChecking=no root@${{ secrets.VM_IP }}
