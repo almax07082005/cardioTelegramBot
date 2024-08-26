@@ -5,6 +5,7 @@ This telegram bot intends to promote information about cardiology.
 ## Instructions
 
 #### !!CHANGE DOCKER_TAG GITHUB VARIABLE FOR NEW PRODUCTION VERSION!!
+#### !!WHEN DEVELOPING TURN OFF LOGGING TO MAIN CHANNEL!!
 
 ### To debug docker container
 

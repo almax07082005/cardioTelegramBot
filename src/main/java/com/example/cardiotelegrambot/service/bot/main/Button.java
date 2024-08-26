@@ -204,7 +204,11 @@ public class Button {
                 new InputMediaPhoto(getFileFromResources("/02242024-1947.png")),
                 new InputMediaPhoto(getFileFromResources("/03052024-1018.png")),
                 new InputMediaPhoto(getFileFromResources("/03172024-0735.png")),
-                new InputMediaPhoto(getFileFromResources("/03302024-2221.png"))
+                new InputMediaPhoto(getFileFromResources("/03302024-2221.png")),
+                new InputMediaPhoto(getFileFromResources("/07262024-1829.png")),
+                new InputMediaPhoto(getFileFromResources("/07282024-1204.png")),
+                new InputMediaPhoto(getFileFromResources("/08052024-1353.png")),
+                new InputMediaPhoto(getFileFromResources("/08062024-1214.png"))
         ));
         bot.execute(new DeleteMessage(chatId, messageId));
         createReview(response.messages());
