@@ -4,6 +4,8 @@ import com.example.cardiotelegrambot.config.enums.logger.LoggerButtons;
 import com.example.cardiotelegrambot.config.enums.logger.LoggerCommands;
 import com.example.cardiotelegrambot.exceptions.NotAdminException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
+import com.example.cardiotelegrambot.exceptions.NotMemberException;
+import com.example.cardiotelegrambot.service.bot.main.Button;
 import com.example.cardiotelegrambot.service.database.ReferralService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -14,6 +16,7 @@ import com.pengrad.telegrambot.response.SendResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -24,24 +27,30 @@ public class LoggerCommand {
 
     private final TelegramBot bot;
     private final ReferralService referralService;
+    private final Button button;
 
     @Value("${telegram.logger.id}")
     private Long adminChatId;
 
     private final Map<LoggerCommands, Runnable> mapCommands;
+    private Long userChatId;
 
     @Autowired
-    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, ReferralService referralService) {
+    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, ReferralService referralService, Button button) {
         this.bot = bot;
         this.referralService = referralService;
+        this.button = button;
 
         mapCommands = new HashMap<>();
         mapCommands.put(LoggerCommands.start, this::start);
+        mapCommands.put(LoggerCommands.check, this::check);
     }
 
     public Runnable getCommand(String command) {
         try {
-            return mapCommands.get(LoggerCommands.fromString(command));
+            Pair<LoggerCommands, Long> pair = LoggerCommands.fromString(command);
+            userChatId = pair.getSecond();
+            return mapCommands.get(pair.getFirst());
         } catch (NotCommandException exception) {
             return this::notACommand;
         }
@@ -72,6 +81,34 @@ public class LoggerCommand {
                         """,
                         referralService.isPresent() ? "АКТИВНА": "НЕ АКТИВНА"
                 ));
+        message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
+
+        SendResponse response = bot.execute(message);
+        LoggerButton.setMessageId(response.message().messageId());
+    }
+
+    private void check() {
+        SendMessage message;
+        try {
+            button
+                    .setByVariables(userChatId)
+                    .isSubscribed();
+            message = new SendMessage(
+                    adminChatId,
+                    String.format("""
+                            Пользователь %s подписан на твой канал.
+                            """, userChatId
+                    )
+            );
+        } catch (NotMemberException | NullPointerException exception) {
+            message = new SendMessage(
+                    adminChatId,
+                    String.format("""
+                            Пользователь %s НЕ подписан на твой канал.
+                            """, userChatId
+                    )
+            );
+        }
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
 
         SendResponse response = bot.execute(message);
