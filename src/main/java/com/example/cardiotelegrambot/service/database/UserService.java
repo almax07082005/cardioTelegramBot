@@ -106,7 +106,7 @@ public class UserService {
         try {
             FileWriter out = new FileWriter(tableFilename);
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                    .setHeader("chatId", "username", "usersAmount")
+                    .setHeader("chat ID", "Алиас", "Количество юзеров")
                     .build();
             try (CSVPrinter printer = new CSVPrinter(out, csvFormat)) {
                 for (UserDTO user : users) {
