@@ -17,6 +17,9 @@ public enum Commands {
     }
 
     public static Pair<Commands, String> fromString(String name) throws NotCommandException {
+        if (name == null) {
+            throw new NotCommandException();
+        }
 
         String[] commandsList = name.split(" ");
         if (commandsList[0].equals("/start") && commandsList.length == 2) {
