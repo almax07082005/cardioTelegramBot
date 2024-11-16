@@ -31,6 +31,12 @@ public class LogConfig {
     @Value("${telegram.logger.error}")
     private Integer errorId;
 
+    @Value("${telegram.is-dev-mode}")
+    private Boolean isDevMode;
+
+    @Value("${telegram.logger.dev-chat-id}")
+    private Long devChatId;
+
     private final TelegramBot loggerBot;
 
     @Autowired
@@ -46,6 +52,13 @@ public class LogConfig {
                 message
         );
 
+        if (isDevMode) {
+            loggerBot.execute(new SendMessage(
+                    devChatId,
+                    finalMessage
+            ));
+            return;
+        }
         loggerBot.execute(new SendMessage(
                 chatId,
                 finalMessage

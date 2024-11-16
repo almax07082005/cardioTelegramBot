@@ -18,15 +18,16 @@ public class LoggerBotService {
     private final Logger logger;
     private final LoggerCommand command;
     private final LoggerButton button;
-    private final LoggerCommand loggerCommand;
 
     @Autowired
-    public LoggerBotService(@Qualifier("loggerBotBean") TelegramBot bot, Logger logger, LoggerCommand command, LoggerButton button, LoggerCommand loggerCommand) {
+    public LoggerBotService(@Qualifier("loggerBotBean") TelegramBot bot,
+                            Logger logger,
+                            LoggerCommand command,
+                            LoggerButton button) {
         this.bot = bot;
         this.logger = logger;
         this.command = command;
         this.button = button;
-        this.loggerCommand = loggerCommand;
     }
 
     public void startBot() {
@@ -51,13 +52,27 @@ public class LoggerBotService {
     }
 
     private void executeButton(Update update) {
-        button
-                .deleteLastMessage()
-                .getButton(LoggerButtons.valueOf(update
-                        .callbackQuery()
-                        .data()
-                ))
-                .run();
+        Long chatId = update
+                .callbackQuery()
+                .from()
+                .id();
+
+        try {
+            button
+                    .isAdmin(chatId)
+                    .deleteLastMessage()
+                    .getButton(LoggerButtons.valueOf(update
+                            .callbackQuery()
+                            .data()
+                    ))
+                    .run();
+        } catch (NotAdminException exception) {
+            SendMessage message = new SendMessage(
+                    chatId,
+                    exception.getMessage()
+            );
+            bot.execute(message);
+        }
     }
 
     private void executeCommand(Update update) {
@@ -73,7 +88,6 @@ public class LoggerBotService {
                     update.message().chat().id(),
                     exception.getMessage()
             );
-            message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
             bot.execute(message);
         }
     }

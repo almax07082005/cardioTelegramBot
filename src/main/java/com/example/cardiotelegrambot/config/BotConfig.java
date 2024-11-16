@@ -9,14 +9,23 @@ import org.springframework.context.annotation.Configuration;
 public class BotConfig {
 
     @Value("${telegram.bot.main-token}")
-    private String token;
+    private String mainToken;
+
+    @Value("${telegram.bot.dev-token}")
+    private String devToken;
 
     @Value("${telegram.bot.logger-token}")
     private String tokenLogger;
 
+    @Value("${telegram.is-dev-mode}")
+    private Boolean isDevMode;
+
     @Bean("mainBotBean")
     public TelegramBot newTelegramBot() {
-        return new TelegramBot(token);
+        if (isDevMode) {
+            return new TelegramBot(devToken);
+        }
+        return new TelegramBot(mainToken);
     }
 
     @Bean("loggerBotBean")

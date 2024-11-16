@@ -39,6 +39,7 @@ jobs:
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}>>.env
           echo MAIN_TOKEN=${{ secrets.MAIN_TOKEN }}>>.env
           echo LOGGER_TOKEN=${{ secrets.LOGGER_TOKEN }}>>.env
+          echo DEV_TOKEN=${{ secrets.DEV_TOKEN }}>>.env
           echo GUIDE=${{ secrets.GUIDE }}>>.env
           echo DOCKER_TAG=${{ vars.DOCKER_TAG }}>>.env
 
