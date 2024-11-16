@@ -24,7 +24,10 @@ public class BotService {
     private final List<Long> blocked;
 
     @Autowired
-    public BotService(@Qualifier("mainBotBean") TelegramBot bot, Button button, Command command, Logger logger) {
+    public BotService(@Qualifier("mainBotBean") TelegramBot bot,
+                      Button button,
+                      Command command,
+                      Logger logger) {
         this.bot = bot;
         this.button = button;
         this.command = command;

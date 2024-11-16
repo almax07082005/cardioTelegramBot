@@ -1,6 +1,7 @@
 package com.example.cardiotelegrambot.service.bot.logger;
 
 import com.example.cardiotelegrambot.config.enums.logger.LoggerButtons;
+import com.example.cardiotelegrambot.exceptions.NotAdminException;
 import com.example.cardiotelegrambot.service.database.ReferralService;
 import com.example.cardiotelegrambot.service.database.UserService;
 import com.pengrad.telegrambot.TelegramBot;
@@ -48,6 +49,14 @@ public class LoggerButton {
         this.loggerCommand = loggerCommand;
         this.userService = userService;
         this.referralService = referralService;
+    }
+
+    public LoggerButton isAdmin(Long chatId) throws NotAdminException {
+        if (!chatId.equals(adminChatId)) {
+            throw new NotAdminException();
+        }
+
+        return this;
     }
 
     public LoggerButton deleteLastMessage() {
