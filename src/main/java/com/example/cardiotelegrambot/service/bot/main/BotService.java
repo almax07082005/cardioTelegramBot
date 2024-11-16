@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 public class BotService {
 
@@ -19,9 +16,6 @@ public class BotService {
     private final Button button;
     private final Command command;
     private final Logger logger;
-
-// TODO temporary solution
-    private final List<Long> blocked;
 
     @Autowired
     public BotService(@Qualifier("mainBotBean") TelegramBot bot,
@@ -32,16 +26,12 @@ public class BotService {
         this.button = button;
         this.command = command;
         this.logger = logger;
-
-        this.blocked = new ArrayList<>();
-        this.blocked.add(5733496893L);
     }
 
     public void startBot() {
         bot.setUpdatesListener(updates -> {
             try {
                 for (Update update : updates) {
-                    if (blocked.contains(update.message().chat().id())) continue;
                     if (update.callbackQuery() != null) executeButton(update);
                     else if (update.message() != null) executeCommand(update);
                 }
