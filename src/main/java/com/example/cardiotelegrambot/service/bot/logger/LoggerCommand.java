@@ -13,6 +13,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,13 @@ public class LoggerCommand {
     @Value("${telegram.logger.id}")
     private Long adminChatId;
 
+    @Value("${telegram.logger.dev-chat-id}")
+    private Long devChatId;
+
+    @Value("${telegram.is-dev-mode}")
+    private Boolean isDevMode;
+
+    private Long chatId;
     private final Map<LoggerCommands, Runnable> mapCommands;
     private Long userChatId;
 
@@ -44,6 +52,11 @@ public class LoggerCommand {
         mapCommands = new HashMap<>();
         mapCommands.put(LoggerCommands.start, this::start);
         mapCommands.put(LoggerCommands.check, this::check);
+    }
+
+    @PostConstruct
+    public void init() {
+        chatId = isDevMode ? devChatId : adminChatId;
     }
 
     public Runnable getCommand(String command) {
@@ -62,7 +75,7 @@ public class LoggerCommand {
                 .chat()
                 .id();
 
-        if (!chatId.equals(adminChatId)) {
+        if (!chatId.equals(this.chatId)) {
             throw new NotAdminException();
         }
 
@@ -71,7 +84,7 @@ public class LoggerCommand {
 
     public void start() {
         SendMessage message = new SendMessage(
-                adminChatId,
+                chatId,
                 String.format("""
                         Привет, братанчик! Тебе пишет твой верный слуга, бот для админов (в этом канале я заправляю, как ты уже понял). Выбери нужную кнопку внизу! Также ты можешь ввести команду /check <chat id юзера>, и ты узнаешь подписан ли этот человек на твой канал.
                         
@@ -94,7 +107,7 @@ public class LoggerCommand {
                     .setByVariables(userChatId)
                     .isSubscribed();
             message = new SendMessage(
-                    adminChatId,
+                    chatId,
                     String.format("""
                             Пользователь %s подписан на твой канал.
                             """, userChatId
@@ -102,7 +115,7 @@ public class LoggerCommand {
             );
         } catch (NotMemberException | NullPointerException exception) {
             message = new SendMessage(
-                    adminChatId,
+                    chatId,
                     String.format("""
                             Пользователь %s НЕ подписан на твой канал.
                             """, userChatId
@@ -134,8 +147,8 @@ public class LoggerCommand {
 
     private void notACommand() {
         SendMessage message = new SendMessage(
-                adminChatId,
-                "Братан, ты какую-то херню написал. Лучше просто нажми одну из доступных кнопок - не ошибешься. Либо напиши команду 'start'."
+                chatId,
+                "Братан, ты какую-то херню написал. Лучше просто нажми одну из доступных кнопок - не ошибешься. Либо напиши команду /start."
         );
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
         bot.execute(message);

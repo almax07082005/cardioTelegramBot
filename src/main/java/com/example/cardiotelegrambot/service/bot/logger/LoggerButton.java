@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.SendDocument;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import jakarta.annotation.PostConstruct;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,6 +37,14 @@ public class LoggerButton {
 
     @Value("${telegram.logger.id}")
     private Long adminChatId;
+    
+    @Value("${telegram.logger.dev-chat-id}")
+    private Long devChatId;
+
+    @Value("${telegram.is-dev-mode}")
+    private Boolean isDevMode;
+
+    private Long chatId;
 
     @Autowired
     public LoggerButton(@Qualifier("loggerBotBean") TelegramBot bot, LoggerCommand loggerCommand, UserService userService, ReferralService referralService) {
@@ -51,8 +60,13 @@ public class LoggerButton {
         this.referralService = referralService;
     }
 
+    @PostConstruct
+    public void init() {
+        chatId = isDevMode ? devChatId : adminChatId;
+    }
+
     public LoggerButton isAdmin(Long chatId) throws NotAdminException {
-        if (!chatId.equals(adminChatId)) {
+        if (!chatId.equals(this.chatId)) {
             throw new NotAdminException();
         }
 
@@ -62,7 +76,7 @@ public class LoggerButton {
     public LoggerButton deleteLastMessage() {
         try {
             bot.execute(new DeleteMessage(
-                    adminChatId,
+                    chatId,
                     messageId
             ));
         } catch (NullPointerException ignored) {}
@@ -77,7 +91,7 @@ public class LoggerButton {
     private void getWinners() {
         userService.storeUsersToCSV();
         SendDocument document = new SendDocument(
-                adminChatId,
+                chatId,
                 new File(tableFilename)
         );
         document.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
@@ -89,7 +103,7 @@ public class LoggerButton {
     private void startReferral() {
         referralService.startReferral();
         SendMessage message = new SendMessage(
-                adminChatId,
+                chatId,
                 "Реферальная программа запущена успешно."
         );
         message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
@@ -101,7 +115,7 @@ public class LoggerButton {
     private void finishReferral() {
         referralService.finishReferral();
         SendMessage message = new SendMessage(
-                adminChatId,
+                chatId,
                 "Реферальная программа завершена успешно."
         );
         message.replyMarkup(loggerCommand.getInlineKeyboardMarkupForMainMenu());
