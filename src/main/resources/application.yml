@@ -14,12 +14,15 @@ spring:
     table: "winners.csv"
 
 telegram:
+  is-dev-mode: "false"
   guide:
     file: "${GUIDE}"
   bot:
     main-token: "${MAIN_TOKEN}"
     logger-token: "${LOGGER_TOKEN}"
+    dev-token: "${DEV_TOKEN}"
   logger:
+    dev-chat-id: "1233629516"
     id: "-1002118949277"
     info: "62"
     warn: "64"
