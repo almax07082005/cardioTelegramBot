@@ -3,6 +3,8 @@ package com.example.cardiotelegrambot.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
 @Component
@@ -16,6 +18,10 @@ public class Logger {
     }
 
     public void logException(Exception exception) {
+        if (exception instanceof SocketException || exception instanceof SocketTimeoutException) {
+            return;
+        }
+
         log.error(exception.getMessage() +
                 "\n" +
                 String.join("\n", Arrays
