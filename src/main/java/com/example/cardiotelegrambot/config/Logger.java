@@ -18,7 +18,8 @@ public class Logger {
     }
 
     public void logException(Exception exception) {
-        if (exception instanceof SocketException || exception instanceof SocketTimeoutException) {
+        if (exception instanceof SocketException || exception instanceof SocketTimeoutException ||
+            exception.getMessage().contains("SocketException") || exception.getMessage().contains("SocketTimeoutException")) {
             return;
         }
 
