@@ -82,7 +82,6 @@ public class Button {
         buttons = new HashMap<>();
         buttons.put(Buttons.inviteFriend, this::inviteFriend);
         buttons.put(Buttons.getGuide, this::getGuide);
-        buttons.put(Buttons.assessRisks, this::assessRisks);
         buttons.put(Buttons.makeAppointment, this::makeAppointment);
         buttons.put(Buttons.aboutMe, this::aboutMe);
         buttons.put(Buttons.help, this::help);
@@ -270,19 +269,6 @@ public class Button {
                 В течение 24ч с вами свяжутся и согласуют удобное время.
                 %n%s
                 """, makeAppointmentLink
-        ));
-
-        message.replyMarkup(new InlineKeyboardMarkup(
-                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
-        ));
-        bot.execute(message);
-    }
-
-    private void assessRisks() {
-        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
-                Оценить свой сердечно-сосудистый риск ⏬️️
-                %n%s
-                """, assessRisksLink
         ));
 
         message.replyMarkup(new InlineKeyboardMarkup(

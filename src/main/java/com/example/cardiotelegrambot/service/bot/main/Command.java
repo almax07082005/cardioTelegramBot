@@ -109,9 +109,6 @@ public class Command {
                 new InlineKeyboardButton("Получить гайд").callbackData(Buttons.getGuide.name())
         );
         inlineKeyboardMarkup.addRow(
-                new InlineKeyboardButton("Оценить сердечно-сосудистый риск").callbackData(Buttons.assessRisks.name())
-        );
-        inlineKeyboardMarkup.addRow(
                 new InlineKeyboardButton("Записаться на консультацию").callbackData(Buttons.makeAppointment.name())
         );
         inlineKeyboardMarkup.addRow(
