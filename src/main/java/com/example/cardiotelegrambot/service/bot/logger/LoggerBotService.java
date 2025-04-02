@@ -54,7 +54,8 @@ public class LoggerBotService {
     private void executeButton(Update update) {
         Long chatId = update
                 .callbackQuery()
-                .from()
+                .message()
+                .chat()
                 .id();
 
         try {

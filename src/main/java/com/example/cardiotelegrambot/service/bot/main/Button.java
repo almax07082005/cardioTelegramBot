@@ -60,9 +60,6 @@ public class Button {
     @Value("${telegram.creator.username}")
     private String creatorUsername;
 
-    @Value("${telegram.assessRisks.link}")
-    private String assessRisksLink;
-
     @Value("${telegram.makeAppointment.link}")
     private String makeAppointmentLink;
 

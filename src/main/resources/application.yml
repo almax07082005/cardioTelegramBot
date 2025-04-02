@@ -32,8 +32,6 @@ telegram:
   channel:
     id: "-1001894647431"
     username: "abaymukanov"
-  assessRisks:
-    link: "https://baymukanov.ru/survey"
   makeAppointment:
     link: "https://baymukanov.ru/#contacts"
   reviews:

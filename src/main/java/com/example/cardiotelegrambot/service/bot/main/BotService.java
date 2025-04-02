@@ -56,13 +56,20 @@ public class BotService {
                 update.callbackQuery().from().id(),
                 update.callbackQuery().data()
         ));
-        button
-                .setByUpdate(update)
-                .getButton(Buttons.valueOf(update
-                        .callbackQuery()
-                        .data()
-                ))
-                .run();
+        try {
+            button
+                    .setByUpdate(update)
+                    .getButton(Buttons.valueOf(update
+                            .callbackQuery()
+                            .data()
+                    ))
+                    .run();
+        } catch (IllegalArgumentException exception) {
+            logger.logWarn(String.format(
+                    "Button \"%s\" isn't found.",
+                    update.callbackQuery().data()
+            ));
+        }
     }
 
     private void executeCommand(Update update) {
