@@ -63,6 +63,9 @@ public class Button {
     @Value("${telegram.makeAppointment.link}")
     private String makeAppointmentLink;
 
+    @Value("${telegram.joinPrivateChat.link}")
+    private String joinPrivateChatLink;
+
     @Value("${telegram.reviews.link}")
     private String reviewsLink;
 
@@ -85,6 +88,7 @@ public class Button {
         buttons.put(Buttons.getBack, this::getBack);
         buttons.put(Buttons.reviews, this::reviews);
         buttons.put(Buttons.education, this::education);
+        buttons.put(Buttons.joinPrivateChat, this::joinPrivateChat);
     }
 
     public Runnable getButton(Buttons button) {
@@ -115,6 +119,21 @@ public class Button {
         this.chatId = chatId;
 
         return this;
+    }
+
+    private void joinPrivateChat() {
+        EditMessageText message = new EditMessageText(chatId, messageId, String.format("""
+                Ознакомиться с условиями участия и оставить заявку на вступление можно по ссылке:
+                
+                %s
+                """,
+                joinPrivateChatLink
+        ));
+
+        message.replyMarkup(new InlineKeyboardMarkup(
+                new InlineKeyboardButton("Главное меню").callbackData(Buttons.getBack.name())
+        ));
+        bot.execute(message);
     }
 
     private void inviteFriend() {

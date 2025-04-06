@@ -9,5 +9,6 @@ public enum Buttons {
     getBack,
     reviews,
     education,
-    subscribe
+    subscribe,
+    joinPrivateChat
 }

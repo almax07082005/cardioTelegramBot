@@ -105,6 +105,9 @@ public class Command {
                 new InlineKeyboardButton("Подписаться на канал").callbackData(Buttons.subscribe.name()).url(String.format("https://t.me/%s", channelUsername))
         );
         inlineKeyboardMarkup.addRow(
+                new InlineKeyboardButton("Вступить в закрытый чат").callbackData(Buttons.joinPrivateChat.name())
+        );
+        inlineKeyboardMarkup.addRow(
                 new InlineKeyboardButton("Пригласить друга").callbackData(Buttons.inviteFriend.name()),
                 new InlineKeyboardButton("Получить гайд").callbackData(Buttons.getGuide.name())
         );
