@@ -20,7 +20,7 @@ public class BotService {
     private final Logger logger;
 
     private static final List<Long> blockedIds = List.of(
-            -1001838078271L
+            1233629516L
     );
 
     @Autowired
@@ -41,7 +41,7 @@ public class BotService {
                     if (update.callbackQuery() != null && !blockedIds.contains(update.callbackQuery().from().id())) {
                         executeButton(update);
                     }
-                    else if (update.message() != null && !blockedIds.contains(update.message().from().id())) {
+                    else if (update.message() != null && !blockedIds.contains(update.message().chat().id())) {
                         executeCommand(update);
                     }
                 }

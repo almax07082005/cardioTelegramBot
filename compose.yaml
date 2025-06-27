@@ -22,6 +22,7 @@ services:
     tty: true
     depends_on:
       - cardio-db
+    pull_policy: never
 
 volumes:
   cardio-db-volume:
