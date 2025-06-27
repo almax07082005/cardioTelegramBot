@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BotService {
 
@@ -16,6 +18,10 @@ public class BotService {
     private final Button button;
     private final Command command;
     private final Logger logger;
+
+    private static final List<Long> blockedIds = List.of(
+            -1001838078271L
+    );
 
     @Autowired
     public BotService(@Qualifier("mainBotBean") TelegramBot bot,
@@ -32,8 +38,12 @@ public class BotService {
         bot.setUpdatesListener(updates -> {
             try {
                 for (Update update : updates) {
-                    if (update.callbackQuery() != null) executeButton(update);
-                    else if (update.message() != null) executeCommand(update);
+                    if (update.callbackQuery() != null && !blockedIds.contains(update.callbackQuery().from().id())) {
+                        executeButton(update);
+                    }
+                    else if (update.message() != null && !blockedIds.contains(update.message().from().id())) {
+                        executeCommand(update);
+                    }
                 }
             } catch (Exception exception) {
                 logger.logException(exception);
