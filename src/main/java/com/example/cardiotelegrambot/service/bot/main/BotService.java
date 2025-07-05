@@ -14,14 +14,13 @@ import java.util.List;
 @Service
 public class BotService {
 
+    private static final List<Long> blockedIds = List.of(
+            -1001838078271L
+    );
     private final TelegramBot bot;
     private final Button button;
     private final Command command;
     private final Logger logger;
-
-    private static final List<Long> blockedIds = List.of(
-            1233629516L
-    );
 
     @Autowired
     public BotService(@Qualifier("mainBotBean") TelegramBot bot,
@@ -40,8 +39,7 @@ public class BotService {
                 for (Update update : updates) {
                     if (update.callbackQuery() != null && !blockedIds.contains(update.callbackQuery().from().id())) {
                         executeButton(update);
-                    }
-                    else if (update.message() != null && !blockedIds.contains(update.message().chat().id())) {
+                    } else if (update.message() != null && !blockedIds.contains(update.message().chat().id())) {
                         executeCommand(update);
                     }
                 }

@@ -23,6 +23,9 @@ services:
     depends_on:
       - cardio-db
     pull_policy: never
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
 
 volumes:
   cardio-db-volume:
