@@ -8,7 +8,8 @@ import org.springframework.data.util.Pair;
 public enum LoggerCommands {
 
     start("/start"),
-    check("/check");
+    check("/check"),
+    message("/message");
 
     private final String name;
 
@@ -26,6 +27,10 @@ public enum LoggerCommands {
             } catch (NumberFormatException e) {
                 return Pair.of(LoggerCommands.check, -1L);
             }
+        }
+
+        if (commandsList[0].equals("/message") && commandsList.length >= 2) {
+            return Pair.of(LoggerCommands.message, -1L);
         }
 
         for (LoggerCommands command : LoggerCommands.values()) {

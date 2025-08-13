@@ -6,6 +6,8 @@ import com.example.cardiotelegrambot.exceptions.NotAdminException;
 import com.example.cardiotelegrambot.exceptions.NotCommandException;
 import com.example.cardiotelegrambot.exceptions.NotMemberException;
 import com.example.cardiotelegrambot.service.bot.main.Button;
+import com.example.cardiotelegrambot.entity.UserEntity;
+import com.example.cardiotelegrambot.repository.UserRepository;
 import com.example.cardiotelegrambot.service.database.ReferralService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -21,14 +23,19 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class LoggerCommand {
 
-    private final TelegramBot bot;
+    private final TelegramBot loggerBot;
+    private final TelegramBot mainBot;
     private final ReferralService referralService;
     private final Button button;
+    private final UserRepository userRepository;
 
     @Value("${telegram.logger.id}")
     private Long adminChatId;
@@ -42,16 +49,24 @@ public class LoggerCommand {
     private Long chatId;
     private final Map<LoggerCommands, Runnable> mapCommands;
     private Long userChatId;
+    private String broadcastMessageText;
 
     @Autowired
-    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot bot, ReferralService referralService, Button button) {
-        this.bot = bot;
+    public LoggerCommand(@Qualifier("loggerBotBean") TelegramBot loggerBot, 
+                         @Qualifier("mainBotBean") TelegramBot mainBot,
+                         ReferralService referralService, 
+                         Button button, 
+                         UserRepository userRepository) {
+        this.loggerBot = loggerBot;
+        this.mainBot = mainBot;
         this.referralService = referralService;
         this.button = button;
+        this.userRepository = userRepository;
 
         mapCommands = new HashMap<>();
         mapCommands.put(LoggerCommands.start, this::start);
         mapCommands.put(LoggerCommands.check, this::check);
+        mapCommands.put(LoggerCommands.message, this::message);
     }
 
     @PostConstruct
@@ -63,6 +78,12 @@ public class LoggerCommand {
         try {
             Pair<LoggerCommands, Long> pair = LoggerCommands.fromString(command);
             userChatId = pair.getSecond();
+            if (pair.getFirst() == LoggerCommands.message) {
+                int firstSpaceIndex = command.indexOf(' ');
+                broadcastMessageText = firstSpaceIndex > -1 && firstSpaceIndex + 1 < command.length()
+                        ? command.substring(firstSpaceIndex + 1)
+                        : "";
+            }
             return mapCommands.get(pair.getFirst());
         } catch (NotCommandException exception) {
             return this::notACommand;
@@ -90,13 +111,15 @@ public class LoggerCommand {
                         
                         Сейчас реферальная программа %s.
                         
+                        Также доступна рассылка: /message <текст> — отправит сообщение всем пользователям бота.
+
                         *Не бойся csv файла, просто открой его, он должен открыться как таблица через приложение Numbers на MacOS или Excel на Windows.
                         """,
                         referralService.isPresent() ? "АКТИВНА": "НЕ АКТИВНА"
                 ));
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
 
-        SendResponse response = bot.execute(message);
+        SendResponse response = loggerBot.execute(message);
         LoggerButton.setMessageId(response.message().messageId());
     }
 
@@ -124,7 +147,45 @@ public class LoggerCommand {
         }
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
 
-        SendResponse response = bot.execute(message);
+        SendResponse response = loggerBot.execute(message);
+        LoggerButton.setMessageId(response.message().messageId());
+    }
+
+    private void message() {
+        if (broadcastMessageText == null || broadcastMessageText.isBlank()) {
+            SendMessage warn = new SendMessage(
+                    chatId,
+                    "Текст сообщения пуст. Используй: /message <текст>"
+            );
+            warn.replyMarkup(getInlineKeyboardMarkupForMainMenu());
+            loggerBot.execute(warn);
+            return;
+        }
+
+        int success = 0;
+        int failed = 0;
+
+        Set<Long> sentChatIds = new HashSet<>();
+        List<UserEntity> users = userRepository.findAll();
+
+        for (UserEntity user : users) {
+            Long mainChatId = user.getChatId();
+            if (mainChatId != null && sentChatIds.add(mainChatId)) {
+                try {
+                    mainBot.execute(new SendMessage(mainChatId, broadcastMessageText));
+                    success++;
+                } catch (Exception ignored) {
+                    failed++;
+                }
+            }
+        }
+
+        SendMessage done = new SendMessage(
+                chatId,
+                String.format("Рассылка завершена. Успешно: %d, Ошибок: %d.", success, failed)
+        );
+        done.replyMarkup(getInlineKeyboardMarkupForMainMenu());
+        SendResponse response = loggerBot.execute(done);
         LoggerButton.setMessageId(response.message().messageId());
     }
 
@@ -151,6 +212,6 @@ public class LoggerCommand {
                 "Братан, ты какую-то херню написал. Лучше просто нажми одну из доступных кнопок - не ошибешься. Либо напиши команду /start."
         );
         message.replyMarkup(getInlineKeyboardMarkupForMainMenu());
-        bot.execute(message);
+        loggerBot.execute(message);
     }
 }
