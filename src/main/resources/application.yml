@@ -35,7 +35,7 @@ telegram:
   makeAppointment:
     link: "https://baymukanov.ru/#contacts"
   joinPrivateChat:
-    link: "https://baymukanov.ru/club"
+    link: "${PRIVATE_CHAT_LINK}"
   reviews:
     link: "https://prodoctorov.ru/moskva/vrach/457300-baymukanov/#rating"
   education:

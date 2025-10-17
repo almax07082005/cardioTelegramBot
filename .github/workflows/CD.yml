@@ -42,6 +42,7 @@ jobs:
           echo DEV_TOKEN=${{ secrets.DEV_TOKEN }}>>.env
           echo GUIDE=${{ secrets.GUIDE }}>>.env
           echo DOCKER_TAG=${{ vars.DOCKER_TAG }}>>.env
+          echo PRIVATE_CHAT_LINK=${{ vars.PRIVATE_CHAT_LINK }}>>.env
 
       - name: Copy .env file to VM
         uses: appleboy/scp-action@v0.1.7
